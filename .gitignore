@@ -1,0 +1,4 @@
+/test-project
+/target
+**/*.rs.bk
+Cargo.lock
