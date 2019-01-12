@@ -1,6 +1,6 @@
 # `fart`: fitzgen's art
 
-My personal tooling and framework for SVG-based generative art. Inspired
+My personal tooling and framework for SVG-based generative art. Inspired by
 [Benjamin Kovach's write up on infrastructure and tooling for generative
 art.](https://www.kovach.me/posts/2018-10-13-infrastructure-of-art.html)
 
