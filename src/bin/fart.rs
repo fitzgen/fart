@@ -1,4 +1,5 @@
 use failure::{bail, ResultExt};
+use fart::Result;
 use notify::Watcher;
 use std::env;
 use std::ffi::OsStr;
@@ -8,8 +9,6 @@ use std::process;
 use std::sync::mpsc;
 use std::time;
 use structopt::StructOpt;
-
-type Result<T> = ::std::result::Result<T, failure::Error>;
 
 trait Command {
     fn run(&mut self) -> Result<()>;
@@ -101,8 +100,16 @@ impl Watch {
 
         let mut file_name = images.join(&now);
         file_name.set_extension("svg");
+        let file_name = file_name.canonicalize().unwrap_or(file_name);
 
-        cargo_run(&self.project, &self.extra, vec![("FART_IMAGE", file_name)])?;
+        cargo_run(
+            &self.project,
+            &self.extra,
+            vec![("FART_FILE_NAME", &file_name)],
+        )?;
+
+        link_as_latest(&self.project, &file_name)?;
+
         git_add_all(&self.project)?;
         if any_staged_in_git(&self.project)? {
             git_commit(&self.project, &now)?;
@@ -187,10 +194,24 @@ where
 {
     process::Command::new("cargo")
         .arg("run")
+        .arg("--manifest-path")
+        .arg(dir.as_ref().join("Cargo.toml"))
         .args(args)
         .envs(envs)
-        .current_dir(dir)
         .run_logged()
+}
+
+fn link_as_latest<P, Q>(project: P, img: Q) -> Result<()>
+where
+    P: AsRef<Path>,
+    Q: AsRef<Path>,
+{
+    let img = img.as_ref();
+    let latest = project.as_ref().join("images").join("latest.svg");
+    let _ = fs::remove_file(&latest);
+    fs::hard_link(img, &latest)
+        .with_context(|_| format!("failed to link {} to {}", img.display(), latest.display()))?;
+    Ok(())
 }
 
 fn git_add_all<P>(dir: P) -> Result<()>
