@@ -38,8 +38,4 @@ commits time-stamped SVGs for you, so you can see the evolution of your project.
 Contains utilities for generating SVGs and working with numbers and RNGs. Mostly
 just re-exports of other crates!
 
-Read the docs:
-
-```
-cargo doc --open
-```
+[**Read the API docs!**](https://docs.rs/fart)
