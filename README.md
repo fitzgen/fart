@@ -4,6 +4,17 @@ My personal tooling and framework for SVG-based generative art. Inspired
 [Benjamin Kovach's write up on infrastructure and tooling for generative
 art.](https://www.kovach.me/posts/2018-10-13-infrastructure-of-art.html)
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [CLI](#cli)
+  - [`fart new $name`](#fart-new-name)
+  - [`fart watch [project]`](#fart-watch-project)
+- [Library](#library)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## CLI
 
 For a full listing of CLI commands and flags, run `fart help [subcommand]`.
