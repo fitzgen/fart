@@ -13,12 +13,41 @@ art.](https://www.kovach.me/posts/2018-10-13-infrastructure-of-art.html)
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
+- [Install](#install)
+- [Quick Start](#quick-start)
 - [CLI](#cli)
   - [`fart new $name`](#fart-new-name)
   - [`fart watch [project]`](#fart-watch-project)
 - [Library](#library)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Install
+
+```
+cargo install fart
+```
+
+## Quick Start
+
+![fart quick start](./fart.gif)
+
+Generate a new `fart` project:
+
+```
+$ fart new my-cool-project
+```
+
+Run `fart watch` to automatically build your project and generate an SVG on each
+change.
+
+```
+$ cd my-cool-project/
+$ fart watch
+```
+
+Hack on your project! Keep refreshing `my-cool-project/images/latest.svg` in
+your browser or preferred SVG viewer to see what your results look like.
 
 ## CLI
 
