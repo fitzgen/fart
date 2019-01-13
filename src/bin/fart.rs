@@ -211,6 +211,7 @@ where
     let _ = fs::remove_file(&latest);
     fs::hard_link(img, &latest)
         .with_context(|_| format!("failed to link {} to {}", img.display(), latest.display()))?;
+    eprintln!("Linked {} to {}", img.display(), latest.display());
     Ok(())
 }
 
