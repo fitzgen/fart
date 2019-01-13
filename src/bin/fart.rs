@@ -65,7 +65,7 @@ impl Command for New {
             .arg("clone")
             .arg(&self.template)
             .arg(&self.name)
-            .run_logged()?;
+            .run_result()?;
         eprintln!(
             "\nCreated new fart project: {}",
             self.name.canonicalize()?.display()
@@ -89,7 +89,7 @@ struct Watch {
 impl Watch {
     fn on_file_change(&self) -> Result<()> {
         eprintln!(
-            "\n--------------------------------------------------------------------------------"
+            "\n\n--------------------------------------------------------------------------------"
         );
         let now = chrono::Utc::now();
         let now = now.format("%Y-%m-%d-%H-%M-%S-%f").to_string();
@@ -102,6 +102,13 @@ impl Watch {
         file_name.set_extension("svg");
         let file_name = file_name.canonicalize().unwrap_or(file_name);
 
+        cargo_build(&self.project, &self.extra)?;
+
+        git_add_all(&self.project)?;
+        if !any_staged_in_git(&self.project)? {
+            return Ok(());
+        }
+
         cargo_run(
             &self.project,
             &self.extra,
@@ -111,9 +118,7 @@ impl Watch {
         link_as_latest(&self.project, &file_name)?;
 
         git_add_all(&self.project)?;
-        if any_staged_in_git(&self.project)? {
-            git_commit(&self.project, &now)?;
-        }
+        git_commit(&self.project, &now)?;
         Ok(())
     }
 }
@@ -166,21 +171,33 @@ impl Command for Watch {
 }
 
 trait CommandExt {
-    fn run_logged(self) -> Result<()>;
+    fn run_result(self) -> Result<()>;
 }
 
 impl CommandExt for &'_ mut process::Command {
-    fn run_logged(self) -> Result<()> {
-        let cmd_str = format!("{:?}", self);
-        eprintln!("Running: {}", cmd_str);
+    fn run_result(self) -> Result<()> {
         let status = self
             .status()
-            .with_context(|_| format!("failed to execute: {}", cmd_str))?;
+            .with_context(|_| format!("failed to execute: {:?}", self))?;
         if !status.success() {
-            bail!("command exited unsuccessfully: {}", cmd_str);
+            bail!("command exited unsuccessfully: {:?}", self);
         }
         Ok(())
     }
+}
+
+fn cargo_build<P, I, A>(dir: P, args: I) -> Result<()>
+where
+    P: AsRef<Path>,
+    I: IntoIterator<Item = A>,
+    A: AsRef<OsStr>,
+{
+    process::Command::new("cargo")
+        .arg("build")
+        .arg("--manifest-path")
+        .arg(dir.as_ref().join("Cargo.toml"))
+        .args(args)
+        .run_result()
 }
 
 fn cargo_run<P, I, A, E, K, V>(dir: P, args: I, envs: E) -> Result<()>
@@ -194,11 +211,12 @@ where
 {
     process::Command::new("cargo")
         .arg("run")
+        .arg("--quiet")
         .arg("--manifest-path")
         .arg(dir.as_ref().join("Cargo.toml"))
         .args(args)
         .envs(envs)
-        .run_logged()
+        .run_result()
 }
 
 fn link_as_latest<P, Q>(project: P, img: Q) -> Result<()>
@@ -211,7 +229,7 @@ where
     let _ = fs::remove_file(&latest);
     fs::hard_link(img, &latest)
         .with_context(|_| format!("failed to link {} to {}", img.display(), latest.display()))?;
-    eprintln!("Linked {} to {}", img.display(), latest.display());
+    eprintln!("\nLinked {} to {}", img.display(), latest.display());
     Ok(())
 }
 
@@ -223,7 +241,7 @@ where
         .arg("add")
         .arg(".")
         .current_dir(dir)
-        .run_logged()
+        .run_result()
 }
 
 fn git_commit<P>(dir: P, msg: &str) -> Result<()>
@@ -236,7 +254,7 @@ where
         .arg("-m")
         .arg(msg)
         .current_dir(dir)
-        .run_logged()
+        .run_result()
 }
 
 fn any_staged_in_git<P>(dir: P) -> Result<bool>
