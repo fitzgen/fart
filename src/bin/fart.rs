@@ -95,7 +95,7 @@ struct Watch {
 impl Watch {
     fn on_file_change(&self) -> Result<()> {
         eprintln!(
-            "\n\n--------------------------------------------------------------------------------"
+            "\n\n████████████████████████████████████████████████████████████████████████████████"
         );
         let now = chrono::Utc::now();
         let now = now.format("%Y-%m-%d-%H-%M-%S-%f").to_string();
