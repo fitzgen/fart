@@ -212,6 +212,7 @@ where
     process::Command::new("cargo")
         .arg("run")
         .arg("--quiet")
+        .arg("--release")
         .arg("--manifest-path")
         .arg(dir.as_ref().join("Cargo.toml"))
         .args(args)
