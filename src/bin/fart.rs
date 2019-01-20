@@ -93,10 +93,25 @@ struct Watch {
 }
 
 impl Watch {
+    fn get_terminal_columns(&self) -> usize {
+        let tput = || -> Result<usize> {
+            let out = process::Command::new("tput").arg("cols").output()?;
+            failure::ensure!(out.status.success(), "`tput` did not exit successfully");
+            let s = String::from_utf8(out.stdout)?;
+            let n = str::parse::<usize>(s.trim())?;
+            Ok(n - 1)
+        };
+
+        tput().unwrap_or(80)
+    }
+
     fn on_file_change(&self) -> Result<()> {
-        eprintln!(
-            "\n\n████████████████████████████████████████████████████████████████████████████████"
-        );
+        eprintln!("\n\n");
+        for _ in 0..self.get_terminal_columns() {
+            eprint!("█");
+        }
+        eprintln!("\n\n");
+
         let now = chrono::Utc::now();
         let now = now.format("%Y-%m-%d-%H-%M-%S-%f").to_string();
 
