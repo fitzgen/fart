@@ -52,6 +52,17 @@ impl Config {
 }
 
 /// Generate an SVG with the given function `f`.
+///
+/// ```no_run
+/// # #![allow(warnings)]
+/// extern crate fart;
+///
+/// fn main() {
+///     fart::generate(|cfg, document| {
+///         unimplemented!("Your code here...")
+///     });
+/// }
+/// ```
 pub fn generate<F>(f: F) -> !
 where
     F: FnOnce(&mut Config, svg::Document) -> Result<svg::Document>,
