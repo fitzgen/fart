@@ -108,7 +108,7 @@ impl Watch {
     fn on_file_change(&self) -> Result<()> {
         eprintln!("\n\n");
         for _ in 0..self.get_terminal_columns() {
-            eprint!("█");
+            eprint!("▔");
         }
         eprintln!("\n\n");
 
