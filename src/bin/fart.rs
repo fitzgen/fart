@@ -66,6 +66,12 @@ impl Command for New {
             .arg(&self.template)
             .arg(&self.name)
             .run_result()?;
+
+        process::Command::new("git")
+            .args(&["remote", "remove", "origin"])
+            .current_dir(&self.name)
+            .run_result()?;
+
         eprintln!(
             "\nCreated new fart project: {}",
             self.name.canonicalize()?.display()
