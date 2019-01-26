@@ -151,6 +151,12 @@ impl<T> AabbTree<T> {
             .collect();
         IterOverlapping { aabb, stack }
     }
+
+    /// Do any of the AABBs in this tree overlap with the give AABB?
+    #[inline]
+    pub fn any_overlap(&self, aabb: AxisAlignedBoundingBox) -> bool {
+        self.iter_overlapping(aabb).next().is_some()
+    }
 }
 
 impl<T> AabbTreeNode<T> {
