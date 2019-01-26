@@ -63,6 +63,62 @@ impl Config {
     }
 }
 
+/// Clamp a value to within some range.
+///
+/// # Example
+///
+/// ```
+/// use fart::clamp;
+///
+/// let x = clamp(5.0, 0.0, 10.0);
+/// assert_eq!(x, 5.0);
+///
+/// let y = clamp(11.0, 0.0, 10.0);
+/// assert_eq!(y, 10.0);
+///
+/// let z = clamp(-5.0, 0.0, 10.0);
+/// assert_eq!(z, 0.0);
+/// ```
+///
+/// # Panics
+///
+/// Panics if `low > high`.
+pub fn clamp(value: f64, low: f64, high: f64) -> f64 {
+    assert!(low <= high);
+    match value {
+        x if x < low => low,
+        x if x > high => high,
+        x => x,
+    }
+}
+
+/// Map a value from one range to another range.
+///
+/// # Example
+///
+/// ```
+/// use fart::map_range;
+///
+/// let x = map_range(0.5, 0.0, 1.0, 0.0, 10.0);
+/// assert_eq!(x, 5.0);
+///
+/// let y = map_range(3.0, 2.0, 5.0, 0.0, 3.0);
+/// assert_eq!(y, 1.0);
+/// ```
+///
+/// # Panics
+///
+/// Panics if the given value is outside the input range, if `in_low > in_high`,
+/// or if `out_low > out_high`.
+pub fn map_range(value: f64, in_low: f64, in_high: f64, out_low: f64, out_high: f64) -> f64 {
+    assert!(in_low <= in_high);
+    assert!(out_low <= out_high);
+    assert!(value >= in_low);
+    assert!(value <= in_high);
+    let slope = 1.0 * (out_high - out_low) / (in_high - in_low);
+    out_low + (slope * (value - in_low)).round()
+}
+
 /// Generate an SVG with the given function `f`.
 ///
 /// ```no_run
