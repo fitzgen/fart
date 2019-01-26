@@ -79,7 +79,7 @@ impl Scene {
         let height = height.into();
         let mut doc = svg::Document::new()
             .set(
-                "view",
+                "viewBox",
                 format!(
                     "{} {} {} {}",
                     self.view.min().x,
