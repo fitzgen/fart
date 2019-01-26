@@ -1,5 +1,9 @@
 //! Shapes in a scene.
 
+mod triangle;
+
+pub use triangle::Triangle;
+
 use crate::aabb::AxisAlignedBoundingBox;
 use crate::path::Path;
 use id_arena::Id;

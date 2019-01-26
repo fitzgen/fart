@@ -28,6 +28,31 @@ impl AxisAlignedBoundingBox {
         AxisAlignedBoundingBox { min, max, area }
     }
 
+    /// Construct a new axis-aligned bounding box that contains the given set of
+    /// vertices.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `vertices` is empty.
+    pub fn for_vertices<I>(vertices: I) -> AxisAlignedBoundingBox
+    where
+        I: IntoIterator<Item = Point2>,
+    {
+        let mut vertices = vertices.into_iter();
+        let first = vertices
+            .next()
+            .expect("Must have at least one vertex to create a bounding box");
+        let mut min = first;
+        let mut max = first;
+        for v in vertices {
+            min.x = f64::min(min.x, v.x);
+            min.y = f64::min(min.y, v.y);
+            max.x = f64::max(max.x, v.x);
+            max.y = f64::max(max.y, v.y);
+        }
+        AxisAlignedBoundingBox::new(min, max)
+    }
+
     /// Get this AABB's min.
     #[inline]
     pub fn min(&self) -> Point2 {

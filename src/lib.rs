@@ -1,4 +1,33 @@
 //! # `fart`: **f**itzgen's generative **art**
+//!
+//! ## Example
+//!
+//! Drawing a random triangle!
+//!
+//! ```no_run
+//! use fart::rand::distributions::{Distribution, Uniform};
+//! use fart::{aabb, scene, shape, Point2};
+//!
+//! fn main() {
+//!     fart::generate(|cfg| {
+//!         let mut scene = scene::Scene::new(aabb::AxisAlignedBoundingBox::new(
+//!             Point2::new(0.0, 0.0),
+//!             Point2::new(1000.0, 1000.0),
+//!         ));
+//!
+//!         let x_dist = Uniform::new(0.0, 1000.0);
+//!         let y_dist = Uniform::new(0.0, 1000.0);
+//!
+//!         scene.add(shape::Triangle {
+//!             a: Point2::new(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!             b: Point2::new(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!             c: Point2::new(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!         });
+//!
+//!         Ok(scene.create_svg(scene::Inches(7.0), scene::Inches(7.0)))
+//!     });
+//! }
+//! ```
 
 #![deny(missing_docs, missing_debug_implementations)]
 
