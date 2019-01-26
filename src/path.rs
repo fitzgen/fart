@@ -6,7 +6,7 @@
 use crate::{Point2, Vector2};
 
 /// A series of line commands that describe a path.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Path {
     /// This path's line commands.
     pub commands: Vec<LineCommand>,
@@ -137,6 +137,23 @@ pub enum LineCommand {
         /// The ending position of the arc.
         end: Vector2,
     },
+}
+
+impl Path {
+    /// Construct a new, empty path.
+    pub fn new() -> Path {
+        Path::default()
+    }
+
+    /// Construct a new path with the given line commands.
+    pub fn with_commands<I>(commands: I) -> Path
+    where
+        I: IntoIterator<Item = LineCommand>,
+    {
+        Path {
+            commands: commands.into_iter().collect(),
+        }
+    }
 }
 
 impl<'a> From<&'a Path> for svg::node::element::Path {
