@@ -2,7 +2,13 @@
 
 #![deny(missing_docs, missing_debug_implementations)]
 
+pub mod aabb;
+pub mod path;
+pub mod scene;
+pub mod shape;
+
 // Re-exports of our public dependencies.
+pub use euclid;
 pub use failure;
 pub use rand;
 pub use svg;
@@ -16,6 +22,12 @@ use std::str;
 
 /// Either an `Ok(T)` or an `Err(failure::Error)`.
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
+
+/// A two dimensional point.
+pub type Point2 = euclid::Point2D<f64>;
+
+/// A two dimensional vector.
+pub type Vector2 = euclid::Vector2D<f64>;
 
 /// Configuration options for SVG generation.
 #[derive(Debug)]
@@ -58,14 +70,14 @@ impl Config {
 /// extern crate fart;
 ///
 /// fn main() {
-///     fart::generate(|cfg, document| {
+///     fart::generate(|cfg| {
 ///         unimplemented!("Your code here...")
 ///     });
 /// }
 /// ```
 pub fn generate<F>(f: F) -> !
 where
-    F: FnOnce(&mut Config, svg::Document) -> Result<svg::Document>,
+    F: FnOnce(&mut Config) -> Result<svg::Document>,
 {
     let code = match try_generate(f) {
         Ok(()) => 0,
@@ -82,19 +94,10 @@ where
 
 fn try_generate<F>(f: F) -> Result<()>
 where
-    F: FnOnce(&mut Config, svg::Document) -> Result<svg::Document>,
+    F: FnOnce(&mut Config) -> Result<svg::Document>,
 {
     let mut config = Config::new().context("failed to read configuration")?;
-    let doc = svg::Document::new();
-    let doc = f(&mut config, doc).context("function supplied to `fart::generate` failed")?;
+    let doc = f(&mut config).context("function supplied to `fart::generate` failed")?;
     svg::save(&config.file_name, &doc).context("failed to save SVG to a file")?;
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }
