@@ -1,3 +1,35 @@
+#[macro_use]
+extern crate quickcheck;
+
+use fart::{
+    aabb::{AabbTree, AxisAlignedBoundingBox},
+    Point2,
+};
+
+#[derive(Clone, Debug)]
+struct Aabb(AxisAlignedBoundingBox);
+
+impl quickcheck::Arbitrary for Aabb {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Aabb {
+        let xs = [f64::arbitrary(g), f64::arbitrary(g)];
+        let ys = [f64::arbitrary(g), f64::arbitrary(g)];
+        Aabb(AxisAlignedBoundingBox::new(
+            Point2::new(f64::min(xs[0], xs[1]), f64::min(ys[0], ys[1])),
+            Point2::new(f64::max(xs[0], xs[1]), f64::max(ys[0], ys[1])),
+        ))
+    }
+}
+
+quickcheck! {
+    fn contains_boxes(boxes: Vec<Aabb>) -> bool {
+        let mut tree = AabbTree::new();
+        for b in boxes.iter() {
+            tree.insert(b.0.clone(), ());
+        }
+        boxes.into_iter().all(|b| tree.any_overlap(b.0))
+    }
+}
+
 #[test]
 fn intersects() {
     let a = AxisAlignedBoundingBox::new(Point2::new(-1.0, -1.0), Point2::new(1.0, 1.0));

@@ -241,6 +241,3 @@ impl<'a, T> Iterator for IterOverlapping<'a, T> {
         }
     }
 }
-
-#[cfg(test)]
-include!("aabb_tests.rs");
