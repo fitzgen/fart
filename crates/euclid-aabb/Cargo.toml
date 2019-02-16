@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 euclid = "0.19.5"
 num-traits = "0.2.6"
+partial-min-max = { version = "0.1.0", path = "../partial-min-max" }
 
 [dev-dependencies]
 quickcheck = "0.8.2"

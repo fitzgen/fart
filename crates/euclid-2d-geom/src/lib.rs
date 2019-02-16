@@ -4,6 +4,7 @@
 
 use euclid::TypedPoint2D;
 use num_traits::{Num, NumAssign, Signed};
+use partial_min_max::{max, min};
 
 fn area2<T, U>(a: TypedPoint2D<T, U>, b: TypedPoint2D<T, U>, c: TypedPoint2D<T, U>) -> T
 where
@@ -158,6 +159,45 @@ where
     #[inline]
     pub fn is_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
         area2(self.a, self.b, point) == T::zero()
+    }
+
+    /// Is the given point on this line segment? That is, not just collinear,
+    /// but also between `self.a` and `self.b`?
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use euclid_2d_geom::{line, Line};
+    ///
+    /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(2, 2));
+    ///
+    /// assert!(l.is_on(point2(1, 1)));
+    ///
+    /// assert!(!l.is_on(point2(0, 1)));
+    /// assert!(!l.is_on(point2(1, 0)));
+    ///
+    /// // Inclusive of the line segment's boundaries.
+    /// assert!(l.is_on(l.a));
+    /// assert!(l.is_on(l.b));
+    ///
+    /// // Does not include collinear-but-not-between points.
+    /// assert!(!l.is_on(point2(3, 3)));
+    /// ```
+    pub fn is_on(&self, point: TypedPoint2D<T, U>) -> bool {
+        if !self.is_collinear(point) {
+            return false;
+        }
+
+        // If this line segment is vertical, check that point.y is between a.y
+        // and b.y. Otherwise check that point.x is between a.x and b.x.
+        if self.a.x == self.b.x {
+            let min = min(self.a.y, self.b.y);
+            let max = max(self.a.y, self.b.y);
+            min <= point.y && point.y <= max
+        } else {
+            let min = min(self.a.x, self.b.x);
+            let max = max(self.a.x, self.b.x);
+            min <= point.x && point.x <= max
+        }
     }
 
     /// Does this line segment (properly) intersect with the other line segment?

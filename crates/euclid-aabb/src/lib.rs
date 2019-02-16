@@ -6,25 +6,8 @@
 
 use euclid::TypedPoint2D;
 use num_traits::Num;
+use partial_min_max::{max as partial_max, min as partial_min};
 use std::fmt;
-
-#[inline]
-fn partial_min<T: PartialOrd>(a: T, b: T) -> T {
-    if a < b {
-        a
-    } else {
-        b
-    }
-}
-
-#[inline]
-fn partial_max<T: PartialOrd>(a: T, b: T) -> T {
-    if a > b {
-        a
-    } else {
-        b
-    }
-}
 
 /// An axis-aligned bounding box.
 ///
