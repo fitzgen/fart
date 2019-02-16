@@ -5,23 +5,24 @@
 //! Drawing a random triangle!
 //!
 //! ```no_run
+//! use fart::euclid::point2;
 //! use fart::rand::distributions::{Distribution, Uniform};
-//! use fart::{aabb, scene, shape, Point2};
+//! use fart::{aabb, scene, shape};
 //!
 //! fn main() {
 //!     fart::generate(|cfg| {
-//!         let mut scene = scene::Scene::new(aabb::AxisAlignedBoundingBox::new(
-//!             Point2::new(0.0, 0.0),
-//!             Point2::new(1000.0, 1000.0),
+//!         let mut scene = scene::Scene::new(aabb::Aabb::new(
+//!             point2(0, 0),
+//!             point2(1000, 1000),
 //!         ));
 //!
-//!         let x_dist = Uniform::new(0.0, 1000.0);
-//!         let y_dist = Uniform::new(0.0, 1000.0);
+//!         let x_dist = Uniform::new(0, 1000);
+//!         let y_dist = Uniform::new(0, 1000);
 //!
 //!         scene.add(shape::Triangle {
-//!             a: Point2::new(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
-//!             b: Point2::new(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
-//!             c: Point2::new(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!             a: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!             b: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!             c: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
 //!         });
 //!
 //!         Ok(scene.create_svg(scene::Inches(7.0), scene::Inches(7.0)))
@@ -31,32 +32,29 @@
 
 #![deny(missing_docs, missing_debug_implementations)]
 
-pub mod aabb;
 pub mod path;
 pub mod scene;
 pub mod shape;
 
 // Re-exports of our public dependencies.
 pub use euclid;
+pub use euclid_aabb as aabb;
 pub use failure;
+pub use num_traits;
 pub use rand;
 pub use svg;
 
 use failure::ResultExt;
+use num_traits::{Num, NumCast};
 use rand::SeedableRng;
 use std::env;
+use std::ops::Range;
 use std::path::PathBuf;
 use std::process;
 use std::str;
 
 /// Either an `Ok(T)` or an `Err(failure::Error)`.
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
-
-/// A two dimensional point.
-pub type Point2 = euclid::Point2D<f64>;
-
-/// A two dimensional vector.
-pub type Vector2 = euclid::Vector2D<f64>;
 
 /// Configuration options for SVG generation.
 #[derive(Debug)]
@@ -92,35 +90,6 @@ impl Config {
     }
 }
 
-/// Clamp a value to within some range.
-///
-/// # Example
-///
-/// ```
-/// use fart::clamp;
-///
-/// let x = clamp(5.0, 0.0, 10.0);
-/// assert_eq!(x, 5.0);
-///
-/// let y = clamp(11.0, 0.0, 10.0);
-/// assert_eq!(y, 10.0);
-///
-/// let z = clamp(-5.0, 0.0, 10.0);
-/// assert_eq!(z, 0.0);
-/// ```
-///
-/// # Panics
-///
-/// Panics if `low > high`.
-pub fn clamp(value: f64, low: f64, high: f64) -> f64 {
-    assert!(low <= high);
-    match value {
-        x if x < low => low,
-        x if x > high => high,
-        x => x,
-    }
-}
-
 /// Map a value from one range to another range.
 ///
 /// # Example
@@ -128,24 +97,47 @@ pub fn clamp(value: f64, low: f64, high: f64) -> f64 {
 /// ```
 /// use fart::map_range;
 ///
-/// let x = map_range(0.5, 0.0, 1.0, 0.0, 10.0);
-/// assert_eq!(x, 5.0);
+/// let x = map_range(5, 0..10, 0..100);
+/// assert_eq!(x, 50);
 ///
-/// let y = map_range(3.0, 2.0, 5.0, 0.0, 3.0);
-/// assert_eq!(y, 1.0);
+/// let y = map_range(3, 2..5, 0..3);
+/// assert_eq!(y, 1);
 /// ```
 ///
 /// # Panics
 ///
-/// Panics if the given value is outside the input range, if `in_low > in_high`,
-/// or if `out_low > out_high`.
-pub fn map_range(value: f64, in_low: f64, in_high: f64, out_low: f64, out_high: f64) -> f64 {
-    assert!(in_low <= in_high);
-    assert!(out_low <= out_high);
+/// Panics if the given value is outside the input range, if `in_low >= in_high`,
+/// or if `out_low >= out_high`, or if number conversions fail.
+pub fn map_range<N, M>(
+    value: N,
+    Range {
+        start: in_low,
+        end: in_high,
+    }: Range<N>,
+    Range {
+        start: out_low,
+        end: out_high,
+    }: Range<M>,
+) -> M
+where
+    N: Num + NumCast + Copy + PartialOrd,
+    M: Num + NumCast + Copy + PartialOrd,
+{
+    assert!(in_low < in_high);
+    assert!(out_low < out_high);
     assert!(value >= in_low);
     assert!(value <= in_high);
-    let slope = 1.0 * (out_high - out_low) / (in_high - in_low);
-    out_low + (slope * (value - in_low)).round()
+
+    let value: M = NumCast::from(value).unwrap();
+    let in_low: M = NumCast::from(in_low).unwrap();
+    let in_high: M = NumCast::from(in_high).unwrap();
+
+    let dividend = out_high - out_low;
+    let divisor = in_high - in_low;
+    assert!(!divisor.is_zero());
+
+    let slope = dividend / divisor;
+    out_low + (slope * (value - in_low))
 }
 
 /// Generate an SVG with the given function `f`.

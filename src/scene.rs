@@ -1,23 +1,27 @@
 //! A scene of shapes.
 
-use crate::aabb::{AabbTree, AxisAlignedBoundingBox};
+use crate::aabb::{Aabb, AabbTree};
 use crate::path::Path;
 use crate::shape::{Shape, ShapeId};
 use id_arena::Arena;
+
+/// Unit for things within the scene space.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SceneSpace;
 
 /// A scene is a collection of shapes, their rendered paths, and all the shapes'
 /// AABBs.
 #[derive(Debug)]
 pub struct Scene {
-    view: AxisAlignedBoundingBox,
-    shapes: Arena<Box<Shape>>,
-    paths: Vec<Path>,
-    bounding_boxes: AabbTree<ShapeId>,
+    view: Aabb<i64, SceneSpace>,
+    shapes: Arena<Box<Shape<i64, SceneSpace>>>,
+    paths: Vec<Path<i64, SceneSpace>>,
+    bounding_boxes: AabbTree<i64, SceneSpace, ShapeId>,
 }
 
 impl Scene {
     /// Construct a new scene with the given viewport.
-    pub fn new(view: AxisAlignedBoundingBox) -> Scene {
+    pub fn new(view: Aabb<i64, SceneSpace>) -> Scene {
         Scene {
             view,
             shapes: Arena::new(),
@@ -27,7 +31,7 @@ impl Scene {
     }
 
     /// Get the AABB tree for every shape that has been added to the scene.
-    pub fn aabb_tree(&self) -> &AabbTree<ShapeId> {
+    pub fn aabb_tree(&self) -> &AabbTree<i64, SceneSpace, ShapeId> {
         &self.bounding_boxes
     }
 
@@ -35,7 +39,10 @@ impl Scene {
     ///
     /// If the shape's bounding box does not intersect with the scene's
     /// viewport, then the shape's paths are ignored.
-    pub fn add<S: 'static + Shape>(&mut self, shape: S) -> ShapeId {
+    pub fn add<S>(&mut self, shape: S) -> ShapeId
+    where
+        S: 'static + Shape<i64, SceneSpace>,
+    {
         let aabb = shape.aabb();
         if self.view.intersects(&aabb) {
             self.paths.extend(shape.paths());
@@ -48,7 +55,7 @@ impl Scene {
     /// Get a reference to a shape that was previously inserted into the scene
     /// with the `add` method.
     #[inline]
-    pub fn get(&self, id: ShapeId) -> Option<&Shape> {
+    pub fn get(&self, id: ShapeId) -> Option<&dyn Shape<i64, SceneSpace>> {
         self.shapes.get(id).map(|s| &**s)
     }
 
@@ -59,13 +66,13 @@ impl Scene {
     /// Make a 3" x 3" SVG from a scene.
     ///
     /// ```
-    /// use fart::aabb::AxisAlignedBoundingBox;
+    /// use fart::aabb::Aabb;
+    /// use fart::euclid::point2;
     /// use fart::scene::{Inches, Scene};
-    /// use fart::{Point2, svg};
     ///
-    /// let scene = Scene::new(AxisAlignedBoundingBox::new(
-    ///     Point2::new(0.0, 0.0),
-    ///     Point2::new(100.0, 100.0),
+    /// let scene = Scene::new(Aabb::new(
+    ///     point2(0, 0),
+    ///     point2(100, 100),
     /// ));
     /// let svg_doc = scene.create_svg(Inches(3.0), Inches(3.0));
     /// # let _ = svg_doc;

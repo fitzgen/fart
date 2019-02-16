@@ -3,27 +3,29 @@
 //! Everything in a scene is eventually lowered into a series of paths, which
 //! are finally compiled to SVG.
 
-use crate::{Point2, Vector2};
+use crate::scene::SceneSpace;
+use euclid::{TypedPoint2D, TypedVector2D};
+use std::fmt::Debug;
 
 /// A series of line commands that describe a path.
 #[derive(Clone, Debug, Default)]
-pub struct Path {
+pub struct Path<T, U> {
     /// This path's line commands.
-    pub commands: Vec<LineCommand>,
+    pub commands: Vec<LineCommand<T, U>>,
 }
 
 /// An individual line command segment within a `Path`.
 #[derive(Clone, Debug)]
-pub enum LineCommand {
+pub enum LineCommand<T, U> {
     /// Move the cursor to the given point.
-    MoveTo(Point2),
+    MoveTo(TypedPoint2D<T, U>),
     /// Move the cursor relative from its current position by the given vector.
-    MoveBy(Vector2),
+    MoveBy(TypedVector2D<T, U>),
 
     /// Draw a line to the given point.
-    LineTo(Point2),
+    LineTo(TypedPoint2D<T, U>),
     /// Draw a line relative from its current position by the given vector.
-    LineBy(Vector2),
+    LineBy(TypedVector2D<T, U>),
 
     /// Draw a horizontal line to the given x coordinate.
     HorizontalLineTo(f64),
@@ -46,66 +48,66 @@ pub enum LineCommand {
     CubicBezierTo {
         /// The first control point, describing the curve out from the starting
         /// position.
-        control_1: Point2,
+        control_1: TypedPoint2D<T, U>,
         /// The second control point, describing the curve into the ending
         /// position.
-        control_2: Point2,
+        control_2: TypedPoint2D<T, U>,
         /// The ending position.
-        end: Point2,
+        end: TypedPoint2D<T, U>,
     },
     /// Draw a cubic bezier curve from the current position with the give
     /// relative vectors.
     CubicBezierBy {
         /// The first control point, describing the curve out from the starting
         /// position.
-        control_1: Vector2,
+        control_1: TypedVector2D<T, U>,
         /// The second control point, describing the curve into the ending
         /// position.
-        control_2: Vector2,
+        control_2: TypedVector2D<T, U>,
         /// The ending position.
-        end: Vector2,
+        end: TypedVector2D<T, U>,
     },
 
     /// Draw a smooth cubic bezier curve from the current position with the
     /// given absolute points.
     SmoothCubicBezierTo {
         /// The control point describing the curve.
-        control: Point2,
+        control: TypedPoint2D<T, U>,
         /// The ending position.
-        end: Point2,
+        end: TypedPoint2D<T, U>,
     },
     /// Draw a smooth cubic bezier curve from the current position with the
     /// given relative vectors.
     SmoothCubicBezierBy {
         /// The control point describing the curve.
-        control: Vector2,
+        control: TypedVector2D<T, U>,
         /// The ending position.
-        end: Vector2,
+        end: TypedVector2D<T, U>,
     },
 
     /// Draw a quadratic bezier curve from the current position with the given
     /// absolute points.
     QuadraticBezierTo {
         /// The control point describing the curve.
-        control: Point2,
+        control: TypedPoint2D<T, U>,
         /// The ending position.
-        end: Point2,
+        end: TypedPoint2D<T, U>,
     },
     /// Draw a quadratic bezier curve from the current position with the given
     /// relative vectors.
     QuadraticBezierBy {
         /// The control point describing the curve.
-        control: Vector2,
+        control: TypedVector2D<T, U>,
         /// The ending position.
-        end: Vector2,
+        end: TypedVector2D<T, U>,
     },
 
     /// Draw a smooth quadratic bezier curve from the current position to the
     /// given absolute point.
-    SmoothQuadtraticCurveTo(Point2),
+    SmoothQuadtraticCurveTo(TypedPoint2D<T, U>),
     /// Draw a smooth quadratic bezier curve from the current position to the
     /// given relative vector.
-    SmoothQuadtraticCurveBy(Vector2),
+    SmoothQuadtraticCurveBy(TypedVector2D<T, U>),
 
     /// Draw an arc to the given absolute end point.
     ArcTo {
@@ -120,7 +122,7 @@ pub enum LineCommand {
         /// Determines whether to begin moving at positive or negative angles.
         sweep_flag: bool,
         /// The ending position of the arc.
-        end: Point2,
+        end: TypedPoint2D<T, U>,
     },
     /// Draw an arc with the given relative end vector.
     ArcBy {
@@ -135,20 +137,20 @@ pub enum LineCommand {
         /// Determines whether to begin moving at positive or negative angles.
         sweep_flag: bool,
         /// The ending position of the arc.
-        end: Vector2,
+        end: TypedVector2D<T, U>,
     },
 }
 
-impl Path {
+impl<T, U> Path<T, U> {
     /// Construct a new, empty path.
-    pub fn new() -> Path {
-        Path::default()
+    pub fn new() -> Path<T, U> {
+        Path { commands: vec![] }
     }
 
     /// Construct a new path with the given line commands.
-    pub fn with_commands<I>(commands: I) -> Path
+    pub fn with_commands<I>(commands: I) -> Path<T, U>
     where
-        I: IntoIterator<Item = LineCommand>,
+        I: IntoIterator<Item = LineCommand<T, U>>,
     {
         Path {
             commands: commands.into_iter().collect(),
@@ -156,8 +158,11 @@ impl Path {
     }
 }
 
-impl<'a> From<&'a Path> for svg::node::element::Path {
-    fn from(path: &'a Path) -> svg::node::element::Path {
+impl<'a, T> From<&'a Path<T, SceneSpace>> for svg::node::element::Path
+where
+    T: Copy + Debug + Into<svg::node::element::path::Parameters>,
+{
+    fn from(path: &'a Path<T, SceneSpace>) -> svg::node::element::Path {
         let mut data = svg::node::element::path::Data::new();
         for cmd in &path.commands {
             data = match cmd {

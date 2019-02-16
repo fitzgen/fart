@@ -1,31 +1,65 @@
-//! Axis-aligned bounding boxes (AABB) and AABB trees.
+//! Two dimensional axis-aligned bounding boxes (AABB) and AABB trees.
 //!
 //! Used for fast-but-imprecise collision detection of shapes in a scene. Once
-//! candidates for collision are quickly found using an AABB tree, we (will
-//! eventually) determine if they precisely collide with a more expensive
-//! algorithm.
+//! candidates for collision are quickly found using an AABB tree, can determine
+//! if they precisely collide with a more expensive algorithm.
 
-use crate::Point2;
-use std::f64;
+use euclid::TypedPoint2D;
+use num_traits::Num;
+use std::fmt;
 
-/// An axis-aligned bounding box.
-#[derive(Debug, Clone, PartialEq)]
-pub struct AxisAlignedBoundingBox {
-    min: Point2,
-    max: Point2,
-    area: f64,
+#[inline]
+fn partial_min<T: PartialOrd>(a: T, b: T) -> T {
+    if a < b {
+        a
+    } else {
+        b
+    }
 }
 
-impl AxisAlignedBoundingBox {
+#[inline]
+fn partial_max<T: PartialOrd>(a: T, b: T) -> T {
+    if a > b {
+        a
+    } else {
+        b
+    }
+}
+
+/// An axis-aligned bounding box.
+///
+/// * `T` is the numeric type. `i32` or `f64` etc.
+/// * `U` is the unit. `ScreenSpace` or `WorldSpace` etc.
+#[derive(Clone, PartialEq)]
+pub struct Aabb<T, U = euclid::UnknownUnit> {
+    min: TypedPoint2D<T, U>,
+    max: TypedPoint2D<T, U>,
+}
+
+impl<T, U> fmt::Debug for Aabb<T, U>
+where
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Aabb")
+            .field("min", &self.min)
+            .field("max", &self.max)
+            .finish()
+    }
+}
+
+impl<T, U> Aabb<T, U>
+where
+    T: Copy + Num + PartialOrd,
+{
     /// Construct a new axis-aligned bounding box.
     ///
     /// `min`'s `x` and `y` components must be less than or equal to `max`'s.
     #[inline]
-    pub fn new(min: Point2, max: Point2) -> AxisAlignedBoundingBox {
-        debug_assert!(min.x <= max.x);
-        debug_assert!(min.y <= max.y);
-        let area = (max.x - min.x) * (max.y - min.y);
-        AxisAlignedBoundingBox { min, max, area }
+    pub fn new(min: TypedPoint2D<T, U>, max: TypedPoint2D<T, U>) -> Aabb<T, U> {
+        assert!(min.x <= max.x);
+        assert!(min.y <= max.y);
+        Aabb { min, max }
     }
 
     /// Construct a new axis-aligned bounding box that contains the given set of
@@ -34,9 +68,9 @@ impl AxisAlignedBoundingBox {
     /// # Panics
     ///
     /// Panics if `vertices` is empty.
-    pub fn for_vertices<I>(vertices: I) -> AxisAlignedBoundingBox
+    pub fn for_vertices<I>(vertices: I) -> Aabb<T, U>
     where
-        I: IntoIterator<Item = Point2>,
+        I: IntoIterator<Item = TypedPoint2D<T, U>>,
     {
         let mut vertices = vertices.into_iter();
         let first = vertices
@@ -45,48 +79,48 @@ impl AxisAlignedBoundingBox {
         let mut min = first;
         let mut max = first;
         for v in vertices {
-            min.x = f64::min(min.x, v.x);
-            min.y = f64::min(min.y, v.y);
-            max.x = f64::max(max.x, v.x);
-            max.y = f64::max(max.y, v.y);
+            min.x = partial_min(min.x, v.x);
+            min.y = partial_min(min.y, v.y);
+            max.x = partial_max(max.x, v.x);
+            max.y = partial_max(max.y, v.y);
         }
-        AxisAlignedBoundingBox::new(min, max)
+        Aabb::new(min, max)
     }
 
     /// Get this AABB's min.
     #[inline]
-    pub fn min(&self) -> Point2 {
+    pub fn min(&self) -> TypedPoint2D<T, U> {
         self.min
     }
 
     /// Get this AABB's max.
     #[inline]
-    pub fn max(&self) -> Point2 {
+    pub fn max(&self) -> TypedPoint2D<T, U> {
         self.max
     }
 
     /// Get this AABB's area.
     #[inline]
-    pub fn area(&self) -> f64 {
-        self.area
+    pub fn area(&self) -> T {
+        (self.max.x - self.min.x) * (self.max.y - self.min.y)
     }
 
     /// Return the least upper bound of `self` and `other`.
     #[inline]
-    pub fn join(&self, other: &AxisAlignedBoundingBox) -> AxisAlignedBoundingBox {
-        let min = euclid::Point2D::new(
-            f64::min(self.min.x, other.min.x),
-            f64::min(self.min.y, other.min.y),
+    pub fn join(&self, other: &Aabb<T, U>) -> Aabb<T, U> {
+        let min = TypedPoint2D::new(
+            partial_min(self.min.x, other.min.x),
+            partial_min(self.min.y, other.min.y),
         );
-        let max = euclid::Point2D::new(
-            f64::max(self.max.x, other.max.x),
-            f64::max(self.max.y, other.max.y),
+        let max = TypedPoint2D::new(
+            partial_max(self.max.x, other.max.x),
+            partial_max(self.max.y, other.max.y),
         );
-        AxisAlignedBoundingBox::new(min, max)
+        Aabb::new(min, max)
     }
 
     /// Does `self` contain `other`?
-    pub fn contains(&self, other: &AxisAlignedBoundingBox) -> bool {
+    pub fn contains(&self, other: &Aabb<T, U>) -> bool {
         other.min.x >= self.min.x
             && other.max.x <= self.max.x
             && other.min.y >= self.min.y
@@ -94,7 +128,7 @@ impl AxisAlignedBoundingBox {
     }
 
     /// Does `self` intersect with `other`?
-    pub fn intersects(&self, other: &AxisAlignedBoundingBox) -> bool {
+    pub fn intersects(&self, other: &Aabb<T, U>) -> bool {
         self.max.x > other.min.x
             && self.min.x < other.max.x
             && self.max.y > other.min.y
@@ -104,37 +138,40 @@ impl AxisAlignedBoundingBox {
 
 /// A tree mapping from axis-aligned bounding boxes to `T` values.
 #[derive(Debug)]
-pub struct AabbTree<T> {
-    root: Option<AabbTreeNode<T>>,
+pub struct AabbTree<T, U, V> {
+    root: Option<AabbTreeNode<T, U, V>>,
 }
 
 #[derive(Debug)]
-enum AabbTreeNode<T> {
-    Branch(AabbTreeBranch<T>),
-    Leaf(AabbTreeLeaf<T>),
+enum AabbTreeNode<T, U, V> {
+    Branch(AabbTreeBranch<T, U, V>),
+    Leaf(AabbTreeLeaf<T, U, V>),
 }
 
 #[derive(Debug)]
-struct AabbTreeBranch<T> {
-    aabb: AxisAlignedBoundingBox,
-    children: Box<(AabbTreeNode<T>, AabbTreeNode<T>)>,
+struct AabbTreeBranch<T, U, V> {
+    aabb: Aabb<T, U>,
+    children: Box<(AabbTreeNode<T, U, V>, AabbTreeNode<T, U, V>)>,
 }
 
 #[derive(Debug)]
-struct AabbTreeLeaf<T> {
-    aabb: AxisAlignedBoundingBox,
-    value: T,
+struct AabbTreeLeaf<T, U, V> {
+    aabb: Aabb<T, U>,
+    value: V,
 }
 
-impl<T> AabbTree<T> {
+impl<T, U, V> AabbTree<T, U, V>
+where
+    T: Copy + Num + PartialOrd,
+{
     /// Construct a new, empty AABB tree.
     #[inline]
-    pub fn new() -> AabbTree<T> {
+    pub fn new() -> AabbTree<T, U, V> {
         AabbTree { root: None }
     }
 
     /// Insert the given value into the AABB tree.
-    pub fn insert(&mut self, aabb: AxisAlignedBoundingBox, value: T) {
+    pub fn insert(&mut self, aabb: Aabb<T, U>, value: V) {
         let leaf = AabbTreeLeaf { aabb, value };
         self.root = Some(if let Some(r) = self.root.take() {
             r.insert(leaf)
@@ -149,17 +186,15 @@ impl<T> AabbTree<T> {
     /// Order of iteration is not defined.
     ///
     /// ```
-    /// use fart::{
-    ///     Point2,
-    ///     aabb::{AabbTree, AxisAlignedBoundingBox},
-    /// };
+    /// use euclid::Point2D;
+    /// use euclid_aabb::{AabbTree, Aabb};
     ///
     /// let mut tree = AabbTree::new();
-    /// tree.insert(AxisAlignedBoundingBox::new(Point2::new(0.0, 0.0), Point2::new(2.0, 2.0)), "Alice");
-    /// tree.insert(AxisAlignedBoundingBox::new(Point2::new(2.0, 2.0), Point2::new(4.0, 4.0)), "Bob");
-    /// tree.insert(AxisAlignedBoundingBox::new(Point2::new(10.0, 10.0), Point2::new(20.0, 20.0)), "Zed");
+    /// tree.insert(Aabb::new(Point2D::new(0.0, 0.0), Point2D::new(2.0, 2.0)), "Alice");
+    /// tree.insert(Aabb::new(Point2D::new(2.0, 2.0), Point2D::new(4.0, 4.0)), "Bob");
+    /// tree.insert(Aabb::new(Point2D::new(10.0, 10.0), Point2D::new(20.0, 20.0)), "Zed");
     ///
-    /// let target = AxisAlignedBoundingBox::new(Point2::new(1.0, 1.0), Point2::new(3.0, 3.0));
+    /// let target = Aabb::new(Point2D::new(1.0, 1.0), Point2D::new(3.0, 3.0));
     /// for (aabb, who) in tree.iter_overlapping(target) {
     ///     match *who {
     ///         "Alice" => println!("Found Alice at {:?}", aabb),
@@ -168,7 +203,7 @@ impl<T> AabbTree<T> {
     ///     }
     /// }
     /// ```
-    pub fn iter_overlapping(&self, aabb: AxisAlignedBoundingBox) -> IterOverlapping<T> {
+    pub fn iter_overlapping(&self, aabb: Aabb<T, U>) -> IterOverlapping<T, U, V> {
         let stack = self
             .root
             .iter()
@@ -179,20 +214,23 @@ impl<T> AabbTree<T> {
 
     /// Do any of the AABBs in this tree overlap with the give AABB?
     #[inline]
-    pub fn any_overlap(&self, aabb: AxisAlignedBoundingBox) -> bool {
+    pub fn any_overlap(&self, aabb: Aabb<T, U>) -> bool {
         self.iter_overlapping(aabb).next().is_some()
     }
 }
 
-impl<T> AabbTreeNode<T> {
-    fn aabb(&self) -> &AxisAlignedBoundingBox {
+impl<T, U, V> AabbTreeNode<T, U, V>
+where
+    T: Copy + Num + PartialOrd,
+{
+    fn aabb(&self) -> &Aabb<T, U> {
         match self {
             AabbTreeNode::Leaf(l) => &l.aabb,
             AabbTreeNode::Branch(b) => &b.aabb,
         }
     }
 
-    fn insert(self, leaf: AabbTreeLeaf<T>) -> AabbTreeNode<T> {
+    fn insert(self, leaf: AabbTreeLeaf<T, U, V>) -> AabbTreeNode<T, U, V> {
         match self {
             AabbTreeNode::Leaf(l) => AabbTreeNode::Branch(AabbTreeBranch {
                 aabb: l.aabb.join(&leaf.aabb),
@@ -200,20 +238,25 @@ impl<T> AabbTreeNode<T> {
             }),
             AabbTreeNode::Branch(branch) => {
                 let combined_aabb = branch.aabb.join(&leaf.aabb);
-                let new_parent_cost = 2.0 * combined_aabb.area;
-                let min_push_down_cost = 2.0 * (combined_aabb.area - branch.aabb.area);
+                let two = T::one() + T::one();
+                let new_parent_cost = two * combined_aabb.area();
+                let min_push_down_cost = two * (combined_aabb.area() - branch.aabb.area());
 
                 let left_cost = match branch.children.0 {
-                    AabbTreeNode::Leaf(ref l) => l.aabb.join(&leaf.aabb).area + min_push_down_cost,
+                    AabbTreeNode::Leaf(ref l) => {
+                        l.aabb.join(&leaf.aabb).area() + min_push_down_cost
+                    }
                     AabbTreeNode::Branch(ref b) => {
-                        b.aabb.join(&leaf.aabb).area - b.aabb.area + min_push_down_cost
+                        b.aabb.join(&leaf.aabb).area() - b.aabb.area() + min_push_down_cost
                     }
                 };
 
                 let right_cost = match branch.children.1 {
-                    AabbTreeNode::Leaf(ref l) => l.aabb.join(&leaf.aabb).area + min_push_down_cost,
+                    AabbTreeNode::Leaf(ref l) => {
+                        l.aabb.join(&leaf.aabb).area() + min_push_down_cost
+                    }
                     AabbTreeNode::Branch(ref b) => {
-                        b.aabb.join(&leaf.aabb).area - b.aabb.area + min_push_down_cost
+                        b.aabb.join(&leaf.aabb).area() - b.aabb.area() + min_push_down_cost
                     }
                 };
 
@@ -238,13 +281,16 @@ impl<T> AabbTreeNode<T> {
 ///
 /// See `AabbTree::iter_overlapping`.
 #[derive(Debug, Clone)]
-pub struct IterOverlapping<'a, T> {
-    aabb: AxisAlignedBoundingBox,
-    stack: Vec<&'a AabbTreeNode<T>>,
+pub struct IterOverlapping<'a, T, U, V> {
+    aabb: Aabb<T, U>,
+    stack: Vec<&'a AabbTreeNode<T, U, V>>,
 }
 
-impl<'a, T> Iterator for IterOverlapping<'a, T> {
-    type Item = (&'a AxisAlignedBoundingBox, &'a T);
+impl<'a, T, U, V> Iterator for IterOverlapping<'a, T, U, V>
+where
+    T: Copy + Num + PartialOrd,
+{
+    type Item = (&'a Aabb<T, U>, &'a V);
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
