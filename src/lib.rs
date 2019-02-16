@@ -5,13 +5,11 @@
 //! Drawing a random triangle!
 //!
 //! ```no_run
-//! use fart::euclid::point2;
-//! use fart::rand::distributions::{Distribution, Uniform};
-//! use fart::{aabb, scene, shape};
+//! use fart::prelude::*;
 //!
 //! fn main() {
 //!     fart::generate(|cfg| {
-//!         let mut scene = scene::Scene::new(aabb::Aabb::new(
+//!         let mut scene = Scene::new(Aabb::new(
 //!             point2(0, 0),
 //!             point2(1000, 1000),
 //!         ));
@@ -19,13 +17,13 @@
 //!         let x_dist = Uniform::new(0, 1000);
 //!         let y_dist = Uniform::new(0, 1000);
 //!
-//!         scene.add(shape::Triangle {
+//!         scene.add(Triangle {
 //!             a: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
 //!             b: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
 //!             c: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
 //!         });
 //!
-//!         Ok(scene.create_svg(scene::Inches(7.0), scene::Inches(7.0)))
+//!         Ok(scene.create_svg(Inches(7.0), Inches(7.0)))
 //!     });
 //! }
 //! ```
@@ -33,6 +31,7 @@
 #![deny(missing_docs, missing_debug_implementations)]
 
 pub mod path;
+pub mod prelude;
 pub mod scene;
 pub mod shape;
 
@@ -48,7 +47,7 @@ use failure::ResultExt;
 use num_traits::{Num, NumCast};
 use rand::SeedableRng;
 use std::env;
-use std::ops::Range;
+use std::ops::{Range, RangeInclusive};
 use std::path::PathBuf;
 use std::process;
 use std::str;
@@ -87,6 +86,41 @@ impl Config {
     #[inline]
     pub fn rng(&mut self) -> &mut impl rand::Rng {
         &mut self.rng
+    }
+}
+
+/// Clamp a value to within some range.
+///
+/// # Example
+///
+/// ```
+/// use fart::clamp;
+///
+/// let x = clamp(5.0, 0.0..=10.0);
+/// assert_eq!(x, 5.0);
+///
+/// let y = clamp(11.0, 0.0..=10.0);
+/// assert_eq!(y, 10.0);
+///
+/// let z = clamp(-5.0, 0.0..=10.0);
+/// assert_eq!(z, 0.0);
+/// ```
+///
+/// # Panics
+///
+/// Panics if `range.start() > range.end()`.
+pub fn clamp<N>(value: N, range: RangeInclusive<N>) -> N
+where
+    N: PartialOrd,
+{
+    let (low, high) = range.into_inner();
+    assert!(low <= high);
+    if value < low {
+        low
+    } else if value > high {
+        high
+    } else {
+        value
     }
 }
 
