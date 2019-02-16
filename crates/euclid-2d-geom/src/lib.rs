@@ -238,4 +238,35 @@ where
         (self.is_left(other.a) ^ self.is_left(other.b))
             && (other.is_left(self.a) ^ other.is_left(self.b))
     }
+
+    /// Does this line segment improperly intersect with the other line segment?
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use euclid_2d_geom::{line, Line};
+    ///
+    /// assert!(
+    ///     line::<i32, UnknownUnit>(point2(0, 0), point2(1, 1))
+    ///         .improperly_intersects(&line(point2(0, 1), point2(1, 0)))
+    /// );
+    ///
+    /// assert!(
+    ///     !line::<i32, UnknownUnit>(point2(0, 0), point2(1, 1))
+    ///         .improperly_intersects(&line(point2(1, 0), point2(2, -1)))
+    /// );
+    ///
+    /// // If any end points from one line segment land on the other line
+    /// // segment, `true` is still returned.
+    /// assert!(
+    ///     line::<i32, UnknownUnit>(point2(0, 0), point2(2, 2))
+    ///         .improperly_intersects(&line(point2(1, 1), point2(2, 0)))
+    /// );
+    /// ```
+    pub fn improperly_intersects(&self, other: &Line<T, U>) -> bool {
+        self.intersects(other)
+            || self.is_on(other.a)
+            || self.is_on(other.b)
+            || other.is_on(self.a)
+            || other.is_on(self.b)
+    }
 }
