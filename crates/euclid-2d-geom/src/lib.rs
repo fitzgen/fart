@@ -159,4 +159,43 @@ where
     pub fn is_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
         area2(self.a, self.b, point) == T::zero()
     }
+
+    /// Does this line segment (properly) intersect with the other line segment?
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use euclid_2d_geom::{line, Line};
+    ///
+    /// assert!(
+    ///     line::<i32, UnknownUnit>(point2(0, 0), point2(1, 1))
+    ///         .intersects(&line(point2(0, 1), point2(1, 0)))
+    /// );
+    ///
+    /// assert!(
+    ///     !line::<i32, UnknownUnit>(point2(0, 0), point2(1, 1))
+    ///         .intersects(&line(point2(1, 0), point2(2, -1)))
+    /// );
+    ///
+    /// // If any end points from one line segment land on the other line
+    /// // segment, `false` is returned because that is not proper intersection.
+    /// assert!(
+    ///     !line::<i32, UnknownUnit>(point2(0, 0), point2(2, 2))
+    ///         .intersects(&line(point2(1, 1), point2(2, 0)))
+    /// );
+    /// ```
+    #[inline]
+    pub fn intersects(&self, other: &Line<T, U>) -> bool {
+        // If any points from a line segment are collinear with the other line
+        // segment, then they cannot properly intersect.
+        if self.is_collinear(other.a)
+            || self.is_collinear(other.b)
+            || other.is_collinear(self.a)
+            || other.is_collinear(self.b)
+        {
+            return false;
+        }
+
+        (self.is_left(other.a) ^ self.is_left(other.b))
+            && (other.is_left(self.a) ^ other.is_left(self.b))
+    }
 }
