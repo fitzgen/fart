@@ -1,0 +1,9 @@
+[package]
+name = "euclid-2d-geom"
+version = "0.1.0"
+authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+euclid = "0.19.5"
+num-traits = "0.2.6"

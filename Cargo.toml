@@ -12,6 +12,7 @@ version = "0.2.0"
 [dependencies]
 chrono = "0.4.6"
 euclid = "0.19.5"
+euclid-2d-geom = { version = "0.1.0", path = "crates/euclid-2d-geom" }
 euclid-aabb = { version = "0.1.0", path = "crates/euclid-aabb" }
 failure = "0.1.3"
 id-arena = "2.0.1"
