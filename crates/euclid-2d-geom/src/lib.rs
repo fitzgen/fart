@@ -117,7 +117,7 @@ where
     /// assert!(!l.is_left(point2(1, 0)));
     ///
     /// // Collinear points are not considered on the left of the line. See
-    /// // also `is_left_or_on`.
+    /// // also `is_left_or_collinear`.
     /// assert!(!l.is_left(point2(2, 2)));
     /// ```
     #[inline]
