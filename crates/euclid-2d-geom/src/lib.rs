@@ -28,12 +28,45 @@ pub struct Polygon<T, U> {
 
 impl<T, U> Polygon<T, U>
 where
-    T: Copy + NumAssign,
+    T: Copy + NumAssign + PartialOrd,
 {
     /// Construct a new polygon.
     pub fn new(points: Vec<TypedPoint2D<T, U>>) -> Polygon<T, U> {
         assert!(points.len() >= 3);
         Polygon { points }
+    }
+
+    /// Get the `i`th point in this polygon.
+    pub fn get(&self, i: usize) -> Option<TypedPoint2D<T, U>> {
+        self.points.get(i).cloned()
+    }
+
+    /// Get the number of points in this polygon.
+    pub fn len(&self) -> usize {
+        self.points.len()
+    }
+
+    /// Get the index of the next vertex after `i` in this polygon.
+    #[inline]
+    pub fn next(&self, i: usize) -> usize {
+        assert!(i < self.points.len());
+        let next = i + 1;
+        if next == self.points.len() {
+            0
+        } else {
+            next
+        }
+    }
+
+    /// Get the index of the previous vertex after `i` in this polygon.
+    #[inline]
+    pub fn prev(&self, i: usize) -> usize {
+        assert!(i < self.points.len());
+        if i == 0 {
+            self.points.len() - 1
+        } else {
+            i - 1
+        }
     }
 
     /// Get the area of this polygon.
@@ -77,6 +110,81 @@ where
             sum += area2(self.points[0], self.points[i], self.points[i + 1]);
         }
         sum
+    }
+
+    /// Do the `a`th and `b`th vertices within this polygon form a diagonal?
+    ///
+    /// If `a` and `b` are diagonal, then there is a direct line of sight
+    /// between them, and they are internal to this polygon.
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use euclid_2d_geom::Polygon;
+    ///
+    /// let p: Polygon<i32, UnknownUnit> = Polygon::new(vec![
+    ///     point2(0,  0),
+    ///     point2(10, 0),
+    ///     point2(5,  5),
+    ///     point2(10, 10),
+    ///     point2(0,  10),
+    /// ]);
+    ///
+    /// assert!(p.is_diagonal(0, 2));
+    /// assert!(!p.is_diagonal(1, 3));
+    /// ```
+    pub fn is_diagonal(&self, a: usize, b: usize) -> bool {
+        assert!(a < self.points.len());
+        assert!(b < self.points.len());
+
+        self.in_cone(a, b) && self.in_cone(b, a) && self.internal_or_external_diagonal(a, b)
+    }
+
+    // Is `b` within the cone from `prev(a)` to `a` to `next(a)`?
+    #[inline]
+    fn in_cone(&self, a: usize, b: usize) -> bool {
+        assert!(a < self.points.len());
+        assert!(b < self.points.len());
+
+        let a_prev = self.points[self.prev(a)];
+        let a_next = self.points[self.next(a)];
+        let a = self.points[a];
+        let b = self.points[b];
+
+        // If `a_prev` is left of the line from `a` to `a_next`, then the cone
+        // is convex.
+        if line(a, a_next).is_left(a_prev) {
+            // When the cone is convex, we just need to check that `a_prev` is
+            // left of the line `a` to `b` and the `a_next` is to the right.
+            let l = line(a, b);
+            l.is_left(a_prev) && l.is_right(a_next)
+        } else {
+            // When the cone is reflex, we check that it is *not* in the inverse
+            // of the cone. The inverse cone is convex, and therefore can be
+            // checked as in the above case, except we allow collinearity since
+            // we then negate the whole thing.
+            let l = line(a, b);
+            !(l.is_left_or_collinear(a_next) && l.is_right_or_collinear(a_prev))
+        }
+    }
+
+    fn internal_or_external_diagonal(&self, a: usize, b: usize) -> bool {
+        assert!(a < self.points.len());
+        assert!(b < self.points.len());
+
+        let l = line(self.points[a], self.points[b]);
+
+        for (i, j) in (0..self.points.len()).zip((1..self.points.len()).chain(Some(0))) {
+            if i == a || i == b || j == a || j == b {
+                continue;
+            }
+
+            let m = line(self.points[i], self.points[j]);
+            if l.improperly_intersects(&m) {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
@@ -159,6 +267,43 @@ where
     #[inline]
     pub fn is_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
         area2(self.a, self.b, point) == T::zero()
+    }
+
+    /// Is the given point on the right of this line?
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use euclid_2d_geom::{line, Line};
+    ///
+    /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(1, 1));
+    ///
+    /// assert!(l.is_right(point2(1, 0)));
+    /// assert!(!l.is_right(point2(0, 1)));
+    ///
+    /// // Collinear points are not considered on the right of the line. See
+    /// // also `is_right_or_collinear`.
+    /// assert!(!l.is_right(point2(2, 2)));
+    /// ```
+    pub fn is_right(&self, point: TypedPoint2D<T, U>) -> bool {
+        area2(self.a, self.b, point) < T::zero()
+    }
+
+    /// Is the given point on the right of this line or collinear with it?
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use euclid_2d_geom::{line, Line};
+    ///
+    /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(1, 1));
+    ///
+    /// assert!(l.is_right_or_collinear(point2(1, 0)));
+    /// assert!(l.is_right_or_collinear(point2(2, 2)));
+    ///
+    /// assert!(!l.is_right_or_collinear(point2(0, 1)));
+    /// ```
+    #[inline]
+    pub fn is_right_or_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
+        area2(self.a, self.b, point) <= T::zero()
     }
 
     /// Is the given point on this line segment? That is, not just collinear,
