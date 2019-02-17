@@ -15,7 +15,7 @@ where
 
 /// A polygon.
 ///
-/// The polygon's points are in counter-clockwise order.
+/// The polygon's vertices are in counter-clockwise order.
 ///
 /// No guarantees whether this polygon is convex or not.
 ///
@@ -23,7 +23,7 @@ where
 /// * `U` is the unit. `ScreenSpace` or `WorldSpace` etc.
 #[derive(Clone, Debug)]
 pub struct Polygon<T, U> {
-    points: Vec<TypedPoint2D<T, U>>,
+    vertices: Vec<TypedPoint2D<T, U>>,
 }
 
 impl<T, U> Polygon<T, U>
@@ -31,27 +31,27 @@ where
     T: Copy + NumAssign + PartialOrd,
 {
     /// Construct a new polygon.
-    pub fn new(points: Vec<TypedPoint2D<T, U>>) -> Polygon<T, U> {
-        assert!(points.len() >= 3);
-        Polygon { points }
+    pub fn new(vertices: Vec<TypedPoint2D<T, U>>) -> Polygon<T, U> {
+        assert!(vertices.len() >= 3);
+        Polygon { vertices }
     }
 
     /// Get the `i`th point in this polygon.
     pub fn get(&self, i: usize) -> Option<TypedPoint2D<T, U>> {
-        self.points.get(i).cloned()
+        self.vertices.get(i).cloned()
     }
 
-    /// Get the number of points in this polygon.
+    /// Get the number of vertices in this polygon.
     pub fn len(&self) -> usize {
-        self.points.len()
+        self.vertices.len()
     }
 
     /// Get the index of the next vertex after `i` in this polygon.
     #[inline]
     pub fn next(&self, i: usize) -> usize {
-        assert!(i < self.points.len());
+        assert!(i < self.vertices.len());
         let next = i + 1;
-        if next == self.points.len() {
+        if next == self.vertices.len() {
             0
         } else {
             next
@@ -61,9 +61,9 @@ where
     /// Get the index of the previous vertex after `i` in this polygon.
     #[inline]
     pub fn prev(&self, i: usize) -> usize {
-        assert!(i < self.points.len());
+        assert!(i < self.vertices.len());
         if i == 0 {
-            self.points.len() - 1
+            self.vertices.len() - 1
         } else {
             i - 1
         }
@@ -106,8 +106,8 @@ where
         T: Signed,
     {
         let mut sum = T::zero();
-        for i in 1..self.points.len() - 1 {
-            sum += area2(self.points[0], self.points[i], self.points[i + 1]);
+        for i in 1..self.vertices.len() - 1 {
+            sum += area2(self.vertices[0], self.vertices[i], self.vertices[i + 1]);
         }
         sum
     }
@@ -133,8 +133,8 @@ where
     /// assert!(!p.is_diagonal(1, 3));
     /// ```
     pub fn is_diagonal(&self, a: usize, b: usize) -> bool {
-        assert!(a < self.points.len());
-        assert!(b < self.points.len());
+        assert!(a < self.vertices.len());
+        assert!(b < self.vertices.len());
 
         self.in_cone(a, b) && self.in_cone(b, a) && self.internal_or_external_diagonal(a, b)
     }
@@ -142,13 +142,13 @@ where
     // Is `b` within the cone from `prev(a)` to `a` to `next(a)`?
     #[inline]
     fn in_cone(&self, a: usize, b: usize) -> bool {
-        assert!(a < self.points.len());
-        assert!(b < self.points.len());
+        assert!(a < self.vertices.len());
+        assert!(b < self.vertices.len());
 
-        let a_prev = self.points[self.prev(a)];
-        let a_next = self.points[self.next(a)];
-        let a = self.points[a];
-        let b = self.points[b];
+        let a_prev = self.vertices[self.prev(a)];
+        let a_next = self.vertices[self.next(a)];
+        let a = self.vertices[a];
+        let b = self.vertices[b];
 
         // If `a_prev` is left of the line from `a` to `a_next`, then the cone
         // is convex.
@@ -168,17 +168,17 @@ where
     }
 
     fn internal_or_external_diagonal(&self, a: usize, b: usize) -> bool {
-        assert!(a < self.points.len());
-        assert!(b < self.points.len());
+        assert!(a < self.vertices.len());
+        assert!(b < self.vertices.len());
 
-        let l = line(self.points[a], self.points[b]);
+        let l = line(self.vertices[a], self.vertices[b]);
 
-        for (i, j) in (0..self.points.len()).zip((1..self.points.len()).chain(Some(0))) {
+        for (i, j) in (0..self.vertices.len()).zip((1..self.vertices.len()).chain(Some(0))) {
             if i == a || i == b || j == a || j == b {
                 continue;
             }
 
-            let m = line(self.points[i], self.points[j]);
+            let m = line(self.vertices[i], self.vertices[j]);
             if l.improperly_intersects(&m) {
                 return false;
             }
