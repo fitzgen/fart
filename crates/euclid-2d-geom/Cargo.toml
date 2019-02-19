@@ -6,5 +6,10 @@ edition = "2018"
 
 [dependencies]
 euclid = "0.19.5"
+fart-utils = { version = "0.1.0", path = "../fart-utils" }
 num-traits = "0.2.6"
 partial-min-max = { version = "0.1.0", path = "../partial-min-max" }
+rand = "0.6.5"
+
+[dev-dependencies]
+quickcheck = "0.8.2"
