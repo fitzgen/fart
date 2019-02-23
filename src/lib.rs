@@ -37,6 +37,7 @@ pub mod shape;
 
 // Re-exports of our public dependencies.
 pub use euclid;
+pub use euclid_2d_geom;
 pub use euclid_aabb as aabb;
 pub use failure;
 pub use num_traits;

@@ -4,12 +4,13 @@
 
 use euclid::{point2, TypedPoint2D};
 use fart_utils::NoMorePartial;
-use num_traits::{Num, NumAssign, NumCast, Signed};
+use num_traits::{Bounded, Num, NumAssign, NumCast, Signed};
 use partial_min_max::{max, min};
 use rand::{distributions::Distribution, seq::IteratorRandom, RngCore};
 use std::cmp::Ordering;
 use std::collections::{BTreeSet, HashSet};
 use std::fmt;
+use std::ops::{Deref, DerefMut};
 
 #[inline]
 fn area2<T, U>(a: TypedPoint2D<T, U>, b: TypedPoint2D<T, U>, c: TypedPoint2D<T, U>) -> T
@@ -92,7 +93,7 @@ where
 /// ```
 pub fn sort_around<T, U>(pivot: TypedPoint2D<T, U>, points: &mut [TypedPoint2D<T, U>])
 where
-    T: Copy + NumAssign + PartialOrd + Signed + fmt::Debug,
+    T: Copy + NumAssign + PartialOrd + Signed,
 {
     points.sort_by(|&a, &b| {
         let zero = T::zero();
@@ -151,7 +152,7 @@ where
 /// ```
 pub fn is_counter_clockwise<T, U>(vertices: &[TypedPoint2D<T, U>]) -> bool
 where
-    T: Copy + NumAssign + Signed + PartialOrd + fmt::Debug,
+    T: Copy + NumAssign + Signed + PartialOrd,
 {
     let mut sum = T::zero();
     for (i, j) in (0..vertices.len()).zip((1..vertices.len()).chain(Some(0))) {
@@ -573,6 +574,228 @@ where
 
         f(self.vertices[0], self.vertices[1], self.vertices[2]);
     }
+
+    /// Iterate over this polygon's edge lines.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use euclid::point2;
+    /// use euclid_2d_geom::{line, Polygon};
+    ///
+    /// #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+    /// struct WorldSpaceUnits;
+    ///
+    /// let p = Polygon::<i32, WorldSpaceUnits>::new(vec![
+    ///     point2(0, 0),
+    ///     point2(0, 2),
+    ///     point2(1, 1),
+    ///     point2(2, 2),
+    ///     point2(0, 2),
+    /// ]);
+    ///
+    /// assert_eq!(
+    ///     p.edges().collect::<Vec<_>>(),
+    ///     [
+    ///         line(point2(0, 0), point2(0, 2)),
+    ///         line(point2(0, 2), point2(1, 1)),
+    ///         line(point2(1, 1), point2(2, 2)),
+    ///         line(point2(2, 2), point2(0, 2)),
+    ///         line(point2(0, 2), point2(0, 0)),
+    ///     ]
+    /// );
+    /// ```
+    pub fn edges<'a>(&'a self) -> impl 'a + Iterator<Item = Line<T, U>> {
+        let ps = self.vertices.iter().cloned();
+        let qs = self
+            .vertices
+            .iter()
+            .cloned()
+            .skip(1)
+            .chain(Some(self.vertices[0]));
+
+        ps.zip(qs).map(|(p, q)| line(p, q))
+    }
+}
+
+/// A convex polygon.
+///
+/// This is a thin newtype wrapper over `Polygon`, and dereferences to the
+/// underlying `Polygon`, but it's guaranteed that this polygon is convex.
+#[derive(Clone)]
+pub struct ConvexPolygon<T, U> {
+    inner: Polygon<T, U>,
+}
+
+impl<T, U> fmt::Debug for ConvexPolygon<T, U>
+where
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("ConvexPolygon")
+            .field("inner", &self.inner)
+            .finish()
+    }
+}
+
+impl<T, U> Deref for ConvexPolygon<T, U> {
+    type Target = Polygon<T, U>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<T, U> DerefMut for ConvexPolygon<T, U> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+
+impl<T, U> ConvexPolygon<T, U>
+where
+    T: Copy + NumAssign + PartialOrd + Signed + Bounded + fmt::Debug,
+{
+    /// Compute the convex hull of the given vertices.
+    ///
+    /// If the convex hull is a polygon with non-zero area, return it. Otherwise
+    /// return `None`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use euclid_2d_geom::ConvexPolygon;
+    /// use std::collections::HashSet;
+    ///
+    /// let hull = ConvexPolygon::<i32, UnknownUnit>::hull(vec![
+    ///     point2(0, 0),
+    ///     point2(0, 1),
+    ///     point2(0, 2),
+    ///     point2(1, 0),
+    ///     point2(1, 1),
+    ///     point2(1, 2),
+    ///     point2(2, 0),
+    ///     point2(2, 1),
+    ///     point2(2, 2),
+    /// ]).expect("should have a convex hull for non-collinear vertex sets");
+    ///
+    /// let actual_hull_vertices = hull.vertices().iter().cloned().collect::<HashSet<_>>();
+    ///
+    /// let expected_hull_vertices = vec![
+    ///     point2(0, 0),
+    ///     point2(0, 2),
+    ///     point2(2, 0),
+    ///     point2(2, 2)
+    /// ].into_iter().collect::<HashSet<_>>();
+    ///
+    /// assert_eq!(actual_hull_vertices, expected_hull_vertices);
+    ///
+    /// // Returns `None` for empty and collinear sets.
+    /// assert!(ConvexPolygon::<i32, UnknownUnit>::hull(vec![]).is_none());
+    /// assert!(ConvexPolygon::<i32, UnknownUnit>::hull(vec![point2(0, 0)]).is_none());
+    /// assert!(ConvexPolygon::<i32, UnknownUnit>::hull(vec![point2(0, 0), point2(1, 1)]).is_none());
+    /// assert!(ConvexPolygon::<i32, UnknownUnit>::hull(vec![point2(0, 0), point2(1, 1), point2(2, 2)]).is_none());
+    /// ```
+    pub fn hull(mut vertices: Vec<TypedPoint2D<T, U>>) -> Option<ConvexPolygon<T, U>> {
+        let max = vertices
+            .iter()
+            .cloned()
+            .fold(point2(T::min_value(), T::min_value()), |a, b| {
+                if NoMorePartial((a.x, a.y)) > NoMorePartial((b.x, b.y)) {
+                    a
+                } else {
+                    b
+                }
+            });
+
+        sort_around(max, &mut vertices);
+        vertices.dedup();
+
+        if vertices.len() < 3 {
+            return None;
+        }
+
+        debug_assert_eq!(max, vertices.last().cloned().unwrap());
+        let mut stack = vec![max, vertices[0]];
+        let mut i = 1;
+        while i < vertices.len() - 1 {
+            assert!(stack.len() >= 2);
+            let v = vertices[i];
+            let l = line(stack[stack.len() - 2], stack[stack.len() - 1]);
+            if l.is_left(v) {
+                // This vertex is (likely) part of the hull! Add it to our
+                // stack.
+                stack.push(v);
+                i += 1;
+            } else if stack.len() == 2 {
+                // The first two vertices in the stack are always part of the
+                // hull, and therefore should never be reconsidered, so start
+                // considering the next `i`th vertex.
+                i += 1;
+            } else {
+                // The top of our stack is not part of the hull, so pop it from
+                // the stack to uncommit it.
+                stack.pop();
+            }
+        }
+
+        if stack.len() < 3 {
+            return None;
+        }
+
+        Some(ConvexPolygon {
+            inner: Polygon::new(stack),
+        })
+    }
+
+    /// Does this convex polygon properly contain the given point?
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use euclid::point2;
+    /// use euclid_2d_geom::ConvexPolygon;
+    ///
+    /// let p = ConvexPolygon::<i32, ()>::hull(vec![
+    ///     point2(0, 0),
+    ///     point2(10, 2),
+    ///     point2(5, 10),
+    /// ]).unwrap();
+    ///
+    /// assert!(p.contains_point(point2(5, 5)));
+    /// assert!(!p.contains_point(point2(-3, -3)));
+    ///
+    /// // Points exactly on the edge are not considered contained.
+    /// assert!(!p.contains_point(point2(0, 0)));
+    /// ```
+    pub fn contains_point(&self, point: TypedPoint2D<T, U>) -> bool {
+        self.edges().all(|e| e.is_left(point))
+    }
+
+    /// Does this convex polygon properly contain the given point?
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use euclid::point2;
+    /// use euclid_2d_geom::ConvexPolygon;
+    ///
+    /// let p = ConvexPolygon::<i32, ()>::hull(vec![
+    ///     point2(0, 0),
+    ///     point2(10, 2),
+    ///     point2(5, 10),
+    /// ]).unwrap();
+    ///
+    /// assert!(p.improperly_contains_point(point2(5, 5)));
+    /// assert!(!p.improperly_contains_point(point2(-3, -3)));
+    ///
+    /// // Points exactly on the edge are considered contained.
+    /// assert!(p.improperly_contains_point(point2(0, 0)));
+    /// ```
+    pub fn improperly_contains_point(&self, point: TypedPoint2D<T, U>) -> bool {
+        self.edges().all(|e| e.is_left_or_collinear(point))
+    }
 }
 
 /// A line between two points.
@@ -582,6 +805,20 @@ pub struct Line<T, U> {
     pub a: TypedPoint2D<T, U>,
     /// The second point.
     pub b: TypedPoint2D<T, U>,
+}
+
+/// The direction a point lies relative to a line. Returned by
+/// `Line::relative_direction_of`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum RelativeDirection {
+    /// The point lies left relative to the line.
+    Left = 1,
+
+    /// The point is collinear with the line.
+    Collinear = 0,
+
+    /// The point lies right relative to the line.
+    Right = -1,
 }
 
 /// Convenience function for creating lines.
@@ -598,6 +835,18 @@ where
     #[inline]
     pub fn new(a: TypedPoint2D<T, U>, b: TypedPoint2D<T, U>) -> Line<T, U> {
         line(a, b)
+    }
+
+    /// Get the direction of the point relative to this line.
+    #[inline]
+    pub fn relative_direction_of(&self, point: TypedPoint2D<T, U>) -> RelativeDirection {
+        let zero = NoMorePartial(T::zero());
+        let det = NoMorePartial(area2(self.a, self.b, point));
+        match det.cmp(&zero) {
+            Ordering::Greater => RelativeDirection::Left,
+            Ordering::Equal => RelativeDirection::Collinear,
+            Ordering::Less => RelativeDirection::Right,
+        }
     }
 
     /// Is the given point on the left of this line?
@@ -617,7 +866,7 @@ where
     /// ```
     #[inline]
     pub fn is_left(&self, point: TypedPoint2D<T, U>) -> bool {
-        area2(self.a, self.b, point) > T::zero()
+        self.relative_direction_of(point) == RelativeDirection::Left
     }
 
     /// Is the given point on the left of this line or collinear with it?
@@ -635,7 +884,10 @@ where
     /// ```
     #[inline]
     pub fn is_left_or_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
-        area2(self.a, self.b, point) >= T::zero()
+        match self.relative_direction_of(point) {
+            RelativeDirection::Left | RelativeDirection::Collinear => true,
+            RelativeDirection::Right => false,
+        }
     }
 
     /// Is the given point collinear with this line?
@@ -653,7 +905,7 @@ where
     /// ```
     #[inline]
     pub fn is_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
-        area2(self.a, self.b, point) == T::zero()
+        self.relative_direction_of(point) == RelativeDirection::Collinear
     }
 
     /// Is the given point on the right of this line?
@@ -673,7 +925,7 @@ where
     /// ```
     #[inline]
     pub fn is_right(&self, point: TypedPoint2D<T, U>) -> bool {
-        area2(self.a, self.b, point) < T::zero()
+        self.relative_direction_of(point) == RelativeDirection::Right
     }
 
     /// Is the given point on the right of this line or collinear with it?
@@ -691,7 +943,10 @@ where
     /// ```
     #[inline]
     pub fn is_right_or_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
-        area2(self.a, self.b, point) <= T::zero()
+        match self.relative_direction_of(point) {
+            RelativeDirection::Right | RelativeDirection::Collinear => true,
+            RelativeDirection::Left => false,
+        }
     }
 
     /// Is the given point on this line segment? That is, not just collinear,
