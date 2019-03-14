@@ -175,6 +175,24 @@ where
                 LineCommand::VerticalLineTo(y) => data.vertical_line_to(*y),
                 LineCommand::VerticalLineBy(dy) => data.vertical_line_by(*dy),
                 LineCommand::Close => data.close(),
+                LineCommand::QuadraticBezierTo { control, end } => {
+                    data.quadratic_curve_to((control.x, control.y, end.x, end.y))
+                }
+                LineCommand::QuadraticBezierBy { control, end } => {
+                    data.quadratic_curve_by((control.x, control.y, end.x, end.y))
+                }
+                LineCommand::SmoothCubicBezierTo { control, end } => {
+                    data.smooth_cubic_curve_to((control.x, control.y, end.x, end.y))
+                }
+                LineCommand::SmoothCubicBezierBy { control, end } => {
+                    data.smooth_cubic_curve_by((control.x, control.y, end.x, end.y))
+                }
+                LineCommand::SmoothQuadtraticCurveTo(p) => {
+                    data.smooth_quadratic_curve_to((p.x, p.y))
+                }
+                LineCommand::SmoothQuadtraticCurveBy(v) => {
+                    data.smooth_quadratic_curve_by((v.x, v.y))
+                }
                 cmd => unimplemented!("Have not implemented support for command yet: {:?}", cmd),
             };
         }
