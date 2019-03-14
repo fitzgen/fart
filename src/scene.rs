@@ -30,6 +30,12 @@ impl Scene {
         }
     }
 
+    /// Get this scene's view.
+    #[inline]
+    pub fn view(&self) -> &Aabb<i64, SceneSpace> {
+        &self.view
+    }
+
     /// Get the AABB tree for every shape that has been added to the scene.
     pub fn aabb_tree(&self) -> &AabbTree<i64, SceneSpace, ShapeId> {
         &self.bounding_boxes
