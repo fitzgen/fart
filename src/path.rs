@@ -28,16 +28,16 @@ pub enum LineCommand<T, U> {
     LineBy(TypedVector2D<T, U>),
 
     /// Draw a horizontal line to the given x coordinate.
-    HorizontalLineTo(f64),
+    HorizontalLineTo(T),
     /// Draw a horizontal line relative from its current position by the given x
     /// delta.
-    HorizontalLineBy(f64),
+    HorizontalLineBy(T),
 
     /// Draw a vertical line to the given y coordinate.
-    VerticalLineTo(f64),
+    VerticalLineTo(T),
     /// Draw a vertical line relative from its current position by the given y
     /// delta.
-    VerticalLineBy(f64),
+    VerticalLineBy(T),
 
     /// Draw a straight line from the current position back to the first
     /// position in the path.
@@ -112,11 +112,11 @@ pub enum LineCommand<T, U> {
     /// Draw an arc to the given absolute end point.
     ArcTo {
         /// The x radius of the arc's ellipse.
-        x_radius: f64,
+        x_radius: T,
         /// The y radius of the arc's ellipse.
-        y_radius: f64,
+        y_radius: T,
         /// The rotation of the arc.
-        x_axis_rotation: euclid::Angle<f64>,
+        x_axis_rotation: euclid::Angle<T>,
         /// Should the arc be greater than or less than 180 degrees?
         large_arc_flag: bool,
         /// Determines whether to begin moving at positive or negative angles.
@@ -127,11 +127,11 @@ pub enum LineCommand<T, U> {
     /// Draw an arc with the given relative end vector.
     ArcBy {
         /// The x radius of the arc's ellipse.
-        x_radius: f64,
+        x_radius: T,
         /// The y radius of the arc's ellipse.
-        y_radius: f64,
+        y_radius: T,
         /// The rotation of the arc.
-        x_axis_rotation: f64,
+        x_axis_rotation: T,
         /// Should the arc be greater than or less than 180 degrees?
         large_arc_flag: bool,
         /// Determines whether to begin moving at positive or negative angles.
