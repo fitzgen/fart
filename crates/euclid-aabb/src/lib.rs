@@ -82,6 +82,18 @@ where
         self.max
     }
 
+    /// Get the width of this AABB.
+    #[inline]
+    pub fn width(&self)-> T {
+        self.max.x - self.min.x
+    }
+
+    /// Get the height of this AABB.
+    #[inline]
+    pub fn height(&self)-> T {
+        self.max.y - self.min.y
+    }
+
     /// Get this AABB's area.
     #[inline]
     pub fn area(&self) -> T {
