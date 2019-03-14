@@ -179,7 +179,6 @@ where
             };
         }
         svg::node::element::Path::new()
-            .set("stroke-width", "3")
             .set("stroke", "black")
             .set("fill", "none")
             .set("d", data)

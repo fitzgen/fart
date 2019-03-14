@@ -17,16 +17,19 @@ pub struct Scene {
     shapes: Arena<Box<Shape<i64, SceneSpace>>>,
     paths: Vec<Path<i64, SceneSpace>>,
     bounding_boxes: AabbTree<i64, SceneSpace, ShapeId>,
+    stroke_width: i64,
 }
 
 impl Scene {
     /// Construct a new scene with the given viewport.
     pub fn new(view: Aabb<i64, SceneSpace>) -> Scene {
+        let stroke_width = view.width() / 500;
         Scene {
             view,
             shapes: Arena::new(),
             paths: Vec::new(),
             bounding_boxes: AabbTree::new(),
+            stroke_width,
         }
     }
 
@@ -105,7 +108,7 @@ impl Scene {
             .set("height", format!("{}{}", height, H::SUFFIX));
         for path in &self.paths {
             let path: svg::node::element::Path = path.into();
-            doc = doc.add(path);
+            doc = doc.add(path.set("stroke-width", self.stroke_width));
         }
         doc
     }
