@@ -25,20 +25,20 @@ quickcheck! {
 #[test]
 fn all_zeros() {
     assert!(check_all_vertices_within_convex_hull(vec![
-        (0,0),
-        (0,0),
-        (0,0),
-        (0,0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
     ]));
 }
 
 #[test]
 fn all_collinear() {
     assert!(check_all_vertices_within_convex_hull(vec![
-        (1,1),
-        (2,2),
-        (3,3),
-        (4,4),
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
     ]));
 }
 

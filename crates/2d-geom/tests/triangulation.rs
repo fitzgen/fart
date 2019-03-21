@@ -21,7 +21,6 @@ impl Arbitrary for ArbitraryPolygon {
         ))
     }
 
-
     // TODO: support shrinking. Needs to handle cases where removing a vertex
     // transforms a simple polygon into a complex polygon, and when removing a
     // vertex causes the clockwise vs counter-clockwise sorting to be flipped.
