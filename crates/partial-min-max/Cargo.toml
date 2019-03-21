@@ -1,7 +1,12 @@
 [package]
-name = "partial-min-max"
-version = "0.3.0"
 authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
+description = "`min` and `max` functions that work with `PartialOrd`."
+documentation = "https://docs.rs/partial-min-max"
 edition = "2018"
+license = "MIT/Apache-2.0"
+name = "partial-min-max"
+readme = "./README.md"
+repository = "https://github.com/fitzgen/fart/tree/master/crates/partial-min-max"
+version = "0.3.0"
 
 [dependencies]

@@ -1,7 +1,12 @@
 [package]
 authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
+description = "Axis-aligned bounding box (AABB) tree built on top of the `euclid` crate."
+documentation = "https://docs.rs/partial-min-max"
 edition = "2018"
+license = "MIT/Apache-2.0"
 name = "fart-aabb"
+readme = "./README.md"
+repository = "https://github.com/fitzgen/fart/tree/master/crates/aabb"
 version = "0.3.0"
 
 [dependencies]
