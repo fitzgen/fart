@@ -12,10 +12,10 @@ version = "0.2.0"
 [dependencies]
 chrono = "0.4.6"
 euclid = "0.19.5"
-euclid-2d-geom = { version = "0.1.0", path = "crates/euclid-2d-geom" }
-euclid-aabb = { version = "0.1.0", path = "crates/euclid-aabb" }
 failure = "0.1.3"
-fart-utils = { version = "0.1.0", path = "crates/fart-utils" }
+fart-2d-geom = { version = "=0.2.0", path = "crates/2d-geom" }
+fart-aabb = { version = "=0.2.0", path = "crates/aabb" }
+fart-utils = { version = "=0.2.0", path = "crates/utils" }
 id-arena = "2.0.1"
 notify = "4.0.6"
 num-traits = "0.2.6"

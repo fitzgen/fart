@@ -1,4 +1,4 @@
-use euclid_aabb::{Aabb, AabbTree};
+use fart_aabb::{Aabb, AabbTree};
 use quickcheck::{quickcheck, Arbitrary};
 
 // Until https://github.com/servo/euclid/pull/318 merges...

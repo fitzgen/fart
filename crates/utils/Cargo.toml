@@ -1,0 +1,12 @@
+[package]
+authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
+description = "A small collection of utility functions used by the `fart` crate."
+documentation = "https://docs.rs/fart-utils"
+edition = "2018"
+license = "MIT/Apache-2.0"
+name = "fart-utils"
+repository = "https://github.com/fitzgen/fart"
+version = "0.2.0"
+
+[dependencies]
+num-traits = "0.2.6"

@@ -1,5 +1,5 @@
 use euclid::{point2, TypedPoint2D};
-use euclid_2d_geom::Polygon;
+use fart_2d_geom::Polygon;
 use quickcheck::{quickcheck, Arbitrary, Gen};
 use rand::distributions::{Distribution, Uniform};
 use std::collections::HashSet;

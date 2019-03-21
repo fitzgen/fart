@@ -31,7 +31,7 @@ where
 ///
 /// ```
 /// use euclid::{point2, UnknownUnit};
-/// use euclid_2d_geom::center;
+/// use fart_2d_geom::center;
 ///
 /// let c = center::<i32, UnknownUnit>(&[
 ///     point2(0, 0), point2(2, 0),
@@ -74,7 +74,7 @@ where
 ///
 /// ```
 /// use euclid::{point2, TypedPoint2D, UnknownUnit};
-/// use euclid_2d_geom::{center, sort_around};
+/// use fart_2d_geom::{center, sort_around};
 ///
 /// let mut points: Vec<TypedPoint2D<i32, UnknownUnit>> = vec![
 ///     point2(0, 2), point2(2, 2),
@@ -134,7 +134,7 @@ where
 ///
 /// ```
 /// use euclid::{point2, UnknownUnit};
-/// use euclid_2d_geom::is_counter_clockwise;
+/// use fart_2d_geom::is_counter_clockwise;
 ///
 /// assert!(is_counter_clockwise::<i32, UnknownUnit>(&[
 ///     point2(0, 1),
@@ -213,7 +213,7 @@ where
     ///
     /// ```
     /// use euclid::UnknownUnit;
-    /// use euclid_2d_geom::Polygon;
+    /// use fart_2d_geom::Polygon;
     /// use rand::{thread_rng, distributions::Uniform};
     ///
     /// // Generate a random pentagon whose vertices are uniformly distributed
@@ -350,7 +350,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::Polygon;
+    /// use fart_2d_geom::Polygon;
     ///
     /// let square: Polygon<i32, UnknownUnit> = Polygon::new(vec![
     ///     point2(0, 0),
@@ -397,7 +397,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::Polygon;
+    /// use fart_2d_geom::Polygon;
     ///
     /// let p: Polygon<i32, UnknownUnit> = Polygon::new(vec![
     ///     point2(0,  0),
@@ -421,7 +421,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::Polygon;
+    /// use fart_2d_geom::Polygon;
     ///
     /// // For a convex polygon, all non-adjacent points should be in cone.
     /// let p: Polygon<i32, UnknownUnit> = Polygon::new(vec![
@@ -505,7 +505,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::Polygon;
+    /// use fart_2d_geom::Polygon;
     ///
     /// let p: Polygon<i32, UnknownUnit> = Polygon::new(vec![
     ///     point2(0, 0),
@@ -581,7 +581,7 @@ where
     ///
     /// ```
     /// use euclid::point2;
-    /// use euclid_2d_geom::{line, Polygon};
+    /// use fart_2d_geom::{line, Polygon};
     ///
     /// #[derive(Copy, Clone, Debug, PartialEq, Eq)]
     /// struct WorldSpaceUnits;
@@ -665,7 +665,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::ConvexPolygon;
+    /// use fart_2d_geom::ConvexPolygon;
     /// use std::collections::HashSet;
     ///
     /// let hull = ConvexPolygon::<i32, UnknownUnit>::hull(vec![
@@ -755,7 +755,7 @@ where
     ///
     /// ```
     /// use euclid::point2;
-    /// use euclid_2d_geom::ConvexPolygon;
+    /// use fart_2d_geom::ConvexPolygon;
     ///
     /// let p = ConvexPolygon::<i32, ()>::hull(vec![
     ///     point2(0, 0),
@@ -779,7 +779,7 @@ where
     ///
     /// ```
     /// use euclid::point2;
-    /// use euclid_2d_geom::ConvexPolygon;
+    /// use fart_2d_geom::ConvexPolygon;
     ///
     /// let p = ConvexPolygon::<i32, ()>::hull(vec![
     ///     point2(0, 0),
@@ -853,7 +853,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(1, 1));
     ///
@@ -873,7 +873,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(1, 1));
     ///
@@ -894,7 +894,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(1, 1));
     ///
@@ -912,7 +912,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(1, 1));
     ///
@@ -932,7 +932,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(1, 1));
     ///
@@ -954,7 +954,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// let l: Line<i32, UnknownUnit> = line(point2(0, 0), point2(2, 2));
     ///
@@ -992,7 +992,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// assert!(
     ///     line::<i32, UnknownUnit>(point2(0, 0), point2(1, 1))
@@ -1031,7 +1031,7 @@ where
     ///
     /// ```
     /// use euclid::{point2, UnknownUnit};
-    /// use euclid_2d_geom::{line, Line};
+    /// use fart_2d_geom::{line, Line};
     ///
     /// assert!(
     ///     line::<i32, UnknownUnit>(point2(0, 0), point2(1, 1))

@@ -182,7 +182,7 @@ where
     ///
     /// ```
     /// use euclid::Point2D;
-    /// use euclid_aabb::{AabbTree, Aabb};
+    /// use fart_aabb::{AabbTree, Aabb};
     ///
     /// let mut tree = AabbTree::new();
     /// tree.insert(Aabb::new(Point2D::new(0.0, 0.0), Point2D::new(2.0, 2.0)), "Alice");

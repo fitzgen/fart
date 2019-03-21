@@ -1,5 +1,5 @@
 use euclid::{point2, TypedPoint2D, UnknownUnit};
-use euclid_2d_geom::ConvexPolygon;
+use fart_2d_geom::ConvexPolygon;
 use quickcheck::quickcheck;
 
 fn check_all_vertices_within_convex_hull(vertices: Vec<(i64, i64)>) -> bool {
