@@ -2,13 +2,13 @@
 authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
 edition = "2018"
 name = "fart-2d-geom"
-version = "0.2.0"
+version = "0.3.0"
 
 [dependencies]
 euclid = "0.19.5"
-fart-utils = { version = "=0.2.0", path = "../utils" }
+fart-utils = { version = "=0.3.0", path = "../utils" }
 num-traits = "0.2.6"
-partial-min-max = { version = "=0.2.0", path = "../partial-min-max" }
+partial-min-max = { version = "=0.3.0", path = "../partial-min-max" }
 rand = "0.6.5"
 
 [dev-dependencies]
