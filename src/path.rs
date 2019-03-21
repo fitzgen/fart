@@ -8,10 +8,22 @@ use euclid::{TypedPoint2D, TypedVector2D};
 use std::fmt::Debug;
 
 /// A series of line commands that describe a path.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Path<T, U> {
+    /// This path's color.
+    pub color: String,
+
     /// This path's line commands.
     pub commands: Vec<LineCommand<T, U>>,
+}
+
+impl<T, U> Default for Path<T, U> {
+    fn default() -> Path<T, U> {
+        Path {
+            color: "black".into(),
+            commands: vec![],
+        }
+    }
 }
 
 /// An individual line command segment within a `Path`.
@@ -144,7 +156,7 @@ pub enum LineCommand<T, U> {
 impl<T, U> Path<T, U> {
     /// Construct a new, empty path.
     pub fn new() -> Path<T, U> {
-        Path { commands: vec![] }
+        Default::default()
     }
 
     /// Construct a new path with the given line commands.
@@ -153,6 +165,7 @@ impl<T, U> Path<T, U> {
         I: IntoIterator<Item = LineCommand<T, U>>,
     {
         Path {
+            color: "black".into(),
             commands: commands.into_iter().collect(),
         }
     }
@@ -197,7 +210,7 @@ where
             };
         }
         svg::node::element::Path::new()
-            .set("stroke", "black")
+            .set("stroke", path.color.as_str())
             .set("fill", "none")
             .set("d", data)
     }
