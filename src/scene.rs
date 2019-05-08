@@ -33,6 +33,16 @@ impl Scene {
         }
     }
 
+    /// Get the stroke width for paths in this scene.
+    pub fn stroke_width(&self) -> i64 {
+        self.stroke_width
+    }
+
+    /// Set the stroke width for paths in this scene.
+    pub fn set_stroke_width(&mut self, stroke_width: i64) {
+        self.stroke_width = stroke_width;
+    }
+
     /// Get this scene's view.
     #[inline]
     pub fn view(&self) -> &Aabb<i64, SceneSpace> {
