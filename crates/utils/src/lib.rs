@@ -4,6 +4,7 @@
 
 use num_traits::{Num, NumCast};
 use std::cmp;
+use std::fmt::Debug;
 use std::ops::{Range, RangeInclusive};
 
 /// Clamp a value to within some range.
@@ -69,13 +70,13 @@ pub fn map_range<N, M>(
     }: Range<M>,
 ) -> M
 where
-    N: Num + NumCast + Copy + PartialOrd,
-    M: Num + NumCast + Copy + PartialOrd,
+    N: Num + NumCast + Copy + PartialOrd + Debug,
+    M: Num + NumCast + Copy + PartialOrd + Debug,
 {
-    assert!(in_low < in_high);
-    assert!(out_low < out_high);
-    assert!(value >= in_low);
-    assert!(value <= in_high);
+    assert!(in_low < in_high, "{:?} < {:?}", in_low, in_high);
+    assert!(out_low < out_high, "{:?} < {:?}", out_low, out_high);
+    assert!(value >= in_low, "{:?} >= {:?}", value, in_low);
+    assert!(value <= in_high, "{:?} <= {:?}", value, in_high);
 
     let value: M = NumCast::from(value).unwrap();
     let in_low: M = NumCast::from(in_low).unwrap();
