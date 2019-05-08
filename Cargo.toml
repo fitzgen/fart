@@ -18,6 +18,7 @@ fart-aabb = { version = "=0.3.0", path = "crates/aabb" }
 fart-utils = { version = "=0.3.0", path = "crates/utils" }
 id-arena = "2.0.1"
 notify = "4.0.6"
+noise = "0.5.1"
 num-traits = "0.2.6"
 rand = "0.6.1"
 structopt = "0.2.14"

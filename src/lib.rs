@@ -40,6 +40,7 @@ pub use euclid;
 pub use failure;
 pub use fart_2d_geom;
 pub use fart_aabb as aabb;
+pub use noise;
 pub use num_traits;
 pub use rand;
 pub use svg;
