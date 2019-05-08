@@ -38,7 +38,7 @@ pub mod shape;
 // Re-exports of our public dependencies.
 pub use euclid;
 pub use failure;
-pub use fart_2d_geom;
+pub use fart_2d_geom as geom;
 pub use fart_aabb as aabb;
 pub use noise;
 pub use num_traits;
