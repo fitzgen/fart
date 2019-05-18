@@ -1,8 +1,7 @@
-use crate::{cargo, git, sub_command::SubCommand, Result};
+use crate::{git, run::Run, sub_command::SubCommand, Result};
 use failure::ResultExt;
 use notify::Watcher;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process;
 use std::sync::mpsc;
 use std::time;
@@ -34,41 +33,18 @@ impl Watch {
     }
 
     fn on_file_change(&self) -> Result<()> {
+        git::add_all(&self.project)?;
+        if !git::any_staged(&self.project)? {
+            return Ok(());
+        }
+
         eprintln!("\n\n");
         for _ in 0..self.get_terminal_columns() {
             eprint!("▔");
         }
         eprintln!("\n\n");
 
-        let now = chrono::Utc::now();
-        let now = now.format("%Y-%m-%d-%H-%M-%S-%f").to_string();
-
-        let images = self.project.join("images");
-        fs::create_dir_all(&images)
-            .with_context(|_| format!("failed to create directory: {}", images.display()))?;
-
-        let mut file_name = images.join(&now);
-        file_name.set_extension("svg");
-        let file_name = file_name.canonicalize().unwrap_or(file_name);
-
-        cargo::build(&self.project, &self.extra)?;
-
-        git::add_all(&self.project)?;
-        if !git::any_staged(&self.project)? {
-            return Ok(());
-        }
-
-        cargo::run(
-            &self.project,
-            &self.extra,
-            vec![("FART_FILE_NAME", &file_name)],
-        )?;
-
-        link_as_latest(&self.project, &file_name)?;
-
-        git::add_all(&self.project)?;
-        git::commit(&self.project, &now)?;
-        Ok(())
+        Run::new(self.project.clone(), self.extra.clone()).run()
     }
 }
 
@@ -117,18 +93,4 @@ impl SubCommand for Watch {
             }
         }
     }
-}
-
-fn link_as_latest<P, Q>(project: P, img: Q) -> Result<()>
-where
-    P: AsRef<Path>,
-    Q: AsRef<Path>,
-{
-    let img = img.as_ref();
-    let latest = project.as_ref().join("images").join("latest.svg");
-    let _ = fs::remove_file(&latest);
-    fs::hard_link(img, &latest)
-        .with_context(|_| format!("failed to link {} to {}", img.display(), latest.display()))?;
-    eprintln!("\nLinked {} to {}", img.display(), latest.display());
-    Ok(())
 }

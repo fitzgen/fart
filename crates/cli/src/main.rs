@@ -2,14 +2,12 @@ mod cargo;
 mod command_ext;
 mod git;
 mod new;
+mod run;
 mod sub_command;
 mod watch;
 
-use crate::new::New;
-use crate::sub_command::SubCommand;
-use crate::watch::Watch;
-use std::env;
-use std::process;
+use crate::{new::New, run::Run, sub_command::SubCommand, watch::Watch};
+use std::{env, process};
 use structopt::StructOpt;
 
 pub type Result<T> = std::result::Result<T, failure::Error>;
@@ -21,6 +19,10 @@ enum Options {
     #[structopt(name = "new")]
     New(New),
 
+    /// Compile and run a fart project, to generate a new SVG.
+    #[structopt(name = "run")]
+    Run(Run),
+
     /// Watch a fart project for changes. On every change, rebuild the project,
     /// save an image, and make a commit.
     #[structopt(name = "watch")]
@@ -31,6 +33,7 @@ impl SubCommand for Options {
     fn run(&mut self) -> Result<()> {
         match self {
             Options::New(n) => n.run(),
+            Options::Run(r) => r.run(),
             Options::Watch(w) => w.run(),
         }
     }
@@ -38,6 +41,7 @@ impl SubCommand for Options {
     fn set_extra(&mut self, extra: &[String]) {
         match self {
             Options::New(n) => n.set_extra(extra),
+            Options::Run(r) => r.set_extra(extra),
             Options::Watch(w) => w.set_extra(extra),
         }
     }
