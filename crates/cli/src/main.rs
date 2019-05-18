@@ -1,5 +1,4 @@
 use failure::{bail, ResultExt};
-use fart::Result;
 use notify::Watcher;
 use std::env;
 use std::ffi::OsStr;
@@ -9,6 +8,8 @@ use std::process;
 use std::sync::mpsc;
 use std::time;
 use structopt::StructOpt;
+
+type Result<T> = std::result::Result<T, failure::Error>;
 
 trait Command {
     fn run(&mut self) -> Result<()>;

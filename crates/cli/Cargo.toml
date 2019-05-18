@@ -1,0 +1,25 @@
+[package]
+authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
+description = "CLI tool for the `fart` framework"
+edition = "2018"
+license = "MIT/Apache-2.0"
+name = "fart-cli"
+readme = "../../README.md"
+repository = "https://github.com/fitzgen/fart"
+version = "0.3.0"
+
+[[bin]]
+name = "fart"
+path = "src/main.rs"
+
+[dependencies]
+chrono = "0.4.6"
+failure = "0.1.5"
+notify = "4.0.11"
+structopt = "0.2.15"
+
+[dev-dependencies]
+assert_cmd = "0.11.1"
+predicates = "1.0.1"
+quickcheck = "0.8.3"
+tempfile = "3.0.7"

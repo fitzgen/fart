@@ -25,7 +25,7 @@ art.](https://www.kovach.me/posts/2018-10-13-infrastructure-of-art.html)
 ## Install
 
 ```
-cargo install fart
+cargo install fart-cli
 ```
 
 ## Quick Start

@@ -15,4 +15,4 @@ num-traits = "0.2.6"
 partial-min-max = { version = "=0.3.0", path = "../partial-min-max" }
 
 [dev-dependencies]
-quickcheck = "0.8.2"
+quickcheck = "0.8.3"
