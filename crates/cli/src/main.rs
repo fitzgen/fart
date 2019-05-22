@@ -1,12 +1,15 @@
+#![feature(async_await)]
+
 mod cargo;
 mod command_ext;
 mod git;
 mod new;
 mod run;
+mod serve;
 mod sub_command;
 mod watch;
 
-use crate::{new::New, run::Run, sub_command::SubCommand, watch::Watch};
+use crate::{new::New, run::Run, serve::Serve, sub_command::SubCommand, watch::Watch};
 use std::{env, process};
 use structopt::StructOpt;
 
@@ -27,6 +30,11 @@ enum Options {
     /// save an image, and make a commit.
     #[structopt(name = "watch")]
     Watch(Watch),
+
+    /// Serve a fart project over a local HTTP server. Also watches, re-builds,
+    /// and re-runs it on every change.
+    #[structopt(name = "serve")]
+    Serve(Serve),
 }
 
 impl SubCommand for Options {
@@ -35,6 +43,7 @@ impl SubCommand for Options {
             Options::New(n) => n.run(),
             Options::Run(r) => r.run(),
             Options::Watch(w) => w.run(),
+            Options::Serve(s) => s.run(),
         }
     }
 
@@ -43,6 +52,7 @@ impl SubCommand for Options {
             Options::New(n) => n.set_extra(extra),
             Options::Run(r) => r.set_extra(extra),
             Options::Watch(w) => w.set_extra(extra),
+            Options::Serve(s) => s.set_extra(extra),
         }
     }
 }

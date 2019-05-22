@@ -17,6 +17,8 @@ chrono = "0.4.6"
 failure = "0.1.5"
 notify = "4.0.11"
 structopt = "0.2.15"
+tide = "0.2.0"
+futures-preview = "0.3.0-alpha.16"
 
 [dev-dependencies]
 assert_cmd = "0.11.1"

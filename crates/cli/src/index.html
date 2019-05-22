@@ -1,0 +1,75 @@
+<!doctype html>
+<meta charset="utf-8"/>
+
+<style>
+ * {
+     margin: 0;
+     padding: 0;
+ }
+
+ body {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+     width: 100vw;
+     height: 100vh;
+ }
+
+ body.light {
+     color: black;
+     background-color: rgb(213,213,209);
+ }
+ body.dark {
+     color: white;
+     background-color: rgb(42,42,46);
+ }
+
+ #latest {
+     min-width: 750px;
+     min-height: 750px;
+     max-width: 750px;
+     max-height: 750px;
+     box-shadow: 5px 5px 20px black;
+ }
+
+ .light #latest {
+     background-color: white;
+ }
+ .dark #latest {
+     background-color: black;
+ }
+
+ #theme {
+     margin-bottom: 1em;
+ }
+
+ #theme label, #theme h3 {
+     margin: 0.5em;
+ }
+</style>
+
+<form id="theme">
+    <h3>Theme</h3>
+    <label><input type="radio" name="theme" value="light" checked /> Light</label>
+    <label><input type="radio" name="theme" value="dark" /> Dark</label>
+</form>
+
+<object id="latest" data="./images/latest.svg" type="image/png">
+    <p>Could not load <code>images/latest.svg</code>
+</object>
+
+<script>
+ const theme = document.getElementById("theme");
+
+ function updateTheme() {
+   const data = new FormData(theme);
+   document.body.setAttribute("class", data.get("theme"));
+ }
+
+ for (const input of theme.querySelectorAll("input")) {
+   input.addEventListener("change", updateTheme);
+ }
+
+ updateTheme();
+</script>
