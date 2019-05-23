@@ -38,7 +38,7 @@ impl SubCommand for Serve {
         self.extra = extra.iter().cloned().collect();
     }
 
-    fn run(&mut self) -> Result<()> {
+    fn run(mut self) -> Result<()> {
         let project = self.project.clone();
         let extra = self.extra.clone();
         thread::spawn(move || {

@@ -1,6 +1,4 @@
-use crate::command_ext::CommandExt;
-use crate::sub_command::SubCommand;
-use crate::Result;
+use crate::{command_ext::CommandExt, output::Output, sub_command::SubCommand, Result};
 use std::path::PathBuf;
 use std::process;
 use structopt::StructOpt;
@@ -18,17 +16,17 @@ pub struct New {
 }
 
 impl SubCommand for New {
-    fn run(&mut self) -> Result<()> {
+    fn run(self) -> Result<()> {
         process::Command::new("git")
             .arg("clone")
             .arg(&self.template)
             .arg(&self.name)
-            .run_result()?;
+            .run_result(&mut Output::Inherit)?;
 
         process::Command::new("git")
             .args(&["remote", "remove", "origin"])
             .current_dir(&self.name)
-            .run_result()?;
+            .run_result(&mut Output::Inherit)?;
 
         eprintln!(
             "\nCreated new fart project: {}",

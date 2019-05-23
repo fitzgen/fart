@@ -4,7 +4,7 @@ use crate::Result;
 /// e.g. `fart watch`.
 pub trait SubCommand {
     /// Run the sub-command.
-    fn run(&mut self) -> Result<()>;
+    fn run(self) -> Result<()>;
 
     /// Set extra arguments passed at the end. This is used to pipe through
     /// extra arguments to `cargo`. By default, they are ignored.

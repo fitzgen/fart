@@ -4,10 +4,12 @@ mod cargo;
 mod command_ext;
 mod git;
 mod new;
+mod output;
 mod run;
 mod serve;
 mod sub_command;
 mod watch;
+mod watcher;
 
 use crate::{new::New, run::Run, serve::Serve, sub_command::SubCommand, watch::Watch};
 use std::{env, process};
@@ -38,7 +40,7 @@ enum Options {
 }
 
 impl SubCommand for Options {
-    fn run(&mut self) -> Result<()> {
+    fn run(self) -> Result<()> {
         match self {
             Options::New(n) => n.run(),
             Options::Run(r) => r.run(),

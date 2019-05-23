@@ -1,10 +1,6 @@
-use crate::{git, run::Run, sub_command::SubCommand, Result};
-use failure::ResultExt;
-use notify::Watcher;
+use crate::{sub_command::SubCommand, watcher::Watcher, Result};
 use std::path::PathBuf;
 use std::process;
-use std::sync::mpsc;
-use std::time;
 use structopt::StructOpt;
 
 /// Watch a fart project for changes.
@@ -35,21 +31,6 @@ impl Watch {
 
         tput().unwrap_or(80)
     }
-
-    fn on_file_change(&self) -> Result<()> {
-        git::add_all(&self.project)?;
-        if !git::any_staged(&self.project)? {
-            return Ok(());
-        }
-
-        eprintln!("\n\n");
-        for _ in 0..self.get_terminal_columns() {
-            eprint!("▔");
-        }
-        eprintln!("\n\n");
-
-        Run::new(self.project.clone(), self.extra.clone()).run()
-    }
 }
 
 impl SubCommand for Watch {
@@ -58,43 +39,16 @@ impl SubCommand for Watch {
         self.extra = extra.iter().cloned().collect();
     }
 
-    fn run(&mut self) -> Result<()> {
-        let (tx, rx) = mpsc::channel();
-
-        let mut watcher = notify::watcher(tx, time::Duration::from_millis(100))
-            .context("failed to create file watcher")?;
-
-        watcher
-            .watch(self.project.join("src"), notify::RecursiveMode::Recursive)
-            .with_context(|_| {
-                format!(
-                    "failed to recursively add directory for watching: {}",
-                    self.project.display()
-                )
-            })?;
-
-        let project = self
-            .project
-            .canonicalize()
-            .unwrap_or_else(|_| self.project.clone());
-        eprintln!("Watching fart project for changes: {}", project.display());
-
-        loop {
-            // Wait for a file to be updated or whatever.
-            let _ = rx
-                .recv()
-                .context("failed to receive file watcher message")?;
-
-            // Drain the channel so we don't build again until we get
-            // notifications from after we build.
-            while let Ok(_) = rx.try_recv() {}
-
-            if let Err(e) = self.on_file_change() {
-                eprintln!("Warning: {}", e);
-                for c in e.iter_causes() {
-                    eprintln!("    Caused by: {}", c);
+    fn run(self) -> Result<()> {
+        Watcher::new(self.project.clone())
+            .extra(self.extra.clone())
+            .on_rerun(move || {
+                eprintln!("\n\n");
+                for _ in 0..self.get_terminal_columns() {
+                    eprint!("▔");
                 }
-            }
-        }
+                eprintln!("\n\n");
+            })
+            .watch()
     }
 }

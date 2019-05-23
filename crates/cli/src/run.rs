@@ -1,4 +1,4 @@
-use crate::{cargo, git, sub_command::SubCommand, Result};
+use crate::{cargo, git, output::Output, sub_command::SubCommand, Result};
 use failure::ResultExt;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -20,15 +20,8 @@ impl Run {
     pub fn new(project: PathBuf, extra: Vec<String>) -> Run {
         Run { project, extra }
     }
-}
 
-impl SubCommand for Run {
-    fn set_extra(&mut self, extra: &[String]) {
-        assert!(self.extra.is_empty());
-        self.extra = extra.iter().cloned().collect();
-    }
-
-    fn run(&mut self) -> Result<()> {
+    pub fn run_with_output(self, output: &mut Output) -> Result<()> {
         let now = chrono::Utc::now();
         let now = now.format("%Y-%m-%d-%H-%M-%S-%f").to_string();
 
@@ -40,32 +33,50 @@ impl SubCommand for Run {
         file_name.set_extension("svg");
         let file_name = file_name.canonicalize().unwrap_or(file_name);
 
-        cargo::build(&self.project, &self.extra)?;
+        cargo::build(&self.project, &self.extra, output)?;
 
         cargo::run(
             &self.project,
             &self.extra,
             vec![("FART_FILE_NAME", &file_name)],
+            output,
         )?;
 
-        link_as_latest(&self.project, &file_name)?;
+        link_as_latest(&self.project, &file_name, output)?;
 
-        git::add_all(&self.project)?;
-        git::commit(&self.project, &now)?;
+        git::add_all(&self.project, output)?;
+        git::commit(&self.project, &now, output)?;
         Ok(())
     }
 }
 
-fn link_as_latest<P, Q>(project: P, img: Q) -> Result<()>
+impl SubCommand for Run {
+    fn set_extra(&mut self, extra: &[String]) {
+        assert!(self.extra.is_empty());
+        self.extra = extra.iter().cloned().collect();
+    }
+
+    fn run(self) -> Result<()> {
+        self.run_with_output(&mut Output::Inherit)
+    }
+}
+
+fn link_as_latest<P, Q>(project: P, img: Q, output: &mut Output) -> Result<()>
 where
     P: AsRef<Path>,
     Q: AsRef<Path>,
 {
+    use std::io::Write;
+
     let img = img.as_ref();
+
     let latest = project.as_ref().join("images").join("latest.svg");
     let _ = fs::remove_file(&latest);
+
     fs::hard_link(img, &latest)
         .with_context(|_| format!("failed to link {} to {}", img.display(), latest.display()))?;
-    eprintln!("\nLinked {} to {}", img.display(), latest.display());
+
+    writeln!(output, "\nLinked {} to {}", img.display(), latest.display())?;
+
     Ok(())
 }

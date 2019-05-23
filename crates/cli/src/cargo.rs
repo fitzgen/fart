@@ -1,10 +1,9 @@
-use crate::command_ext::CommandExt;
-use crate::Result;
+use crate::{command_ext::CommandExt, output::Output, Result};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::process;
 
-pub fn build<P, I, A>(dir: P, args: I) -> Result<()>
+pub fn build<P, I, A>(dir: P, args: I, output: &mut Output) -> Result<()>
 where
     P: AsRef<Path>,
     I: IntoIterator<Item = A>,
@@ -15,10 +14,10 @@ where
         .arg("--manifest-path")
         .arg(dir.as_ref().join("Cargo.toml"))
         .args(args)
-        .run_result()
+        .run_result(output)
 }
 
-pub fn run<P, I, A, E, K, V>(dir: P, args: I, envs: E) -> Result<()>
+pub fn run<P, I, A, E, K, V>(dir: P, args: I, envs: E, output: &mut Output) -> Result<()>
 where
     P: AsRef<Path>,
     I: IntoIterator<Item = A>,
@@ -35,5 +34,5 @@ where
         .arg(dir.as_ref().join("Cargo.toml"))
         .args(args)
         .envs(envs)
-        .run_result()
+        .run_result(output)
 }
