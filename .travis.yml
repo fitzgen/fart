@@ -3,10 +3,6 @@ sudo: false
 
 matrix:
   include:
-    - name: "test (stable)"
-      rust: stable
-    - name: "test (beta)"
-      rust: beta
     - name: "test (nightly)"
       rust: nightly
 
