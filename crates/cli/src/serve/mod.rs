@@ -1,9 +1,14 @@
-use crate::{sub_command::SubCommand, watch::Watch, Result};
-use futures::channel::oneshot;
+mod events;
+
+use crate::{sub_command::SubCommand, watcher::Watcher, Result};
+use failure::ResultExt;
+use futures::channel::{mpsc, oneshot};
+use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use structopt::StructOpt;
 
@@ -28,6 +33,7 @@ impl Serve {
     fn app_data(&mut self) -> AppData {
         AppData {
             project: self.project.clone(),
+            peanut_gallery: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }
@@ -39,16 +45,49 @@ impl SubCommand for Serve {
     }
 
     fn run(mut self) -> Result<()> {
+        let app_data = self.app_data();
+
+        let peanut_gallery = app_data.peanut_gallery.clone();
         let project = self.project.clone();
         let extra = self.extra.clone();
         thread::spawn(move || {
-            Watch::new(project, extra).run().unwrap();
+            Watcher::new(project)
+                .extra(extra)
+                .on_output({
+                    let peanut_gallery = peanut_gallery.clone();
+                    move |output| {
+                        let send_output = || -> Result<()> {
+                            let event = events::Event::new("output".into(), output)
+                                .context("failed to serialize output event")?;
+                            futures::executor::block_on(events::broadcast(&peanut_gallery, event))?;
+                            Ok(())
+                        };
+                        if let Err(e) = send_output() {
+                            eprintln!("warning: {}", e);
+                        }
+                    }
+                })
+                .on_rerun({
+                    let peanut_gallery = peanut_gallery.clone();
+                    move || {
+                        let send_rerun = || -> Result<()> {
+                            let event = events::Event::new("rerun".into(), &())
+                                .context("failed to serialize rerun event")?;
+                            futures::executor::block_on(events::broadcast(&peanut_gallery, event))?;
+                            Ok(())
+                        };
+                        if let Err(e) = send_rerun() {
+                            eprintln!("warning: {}", e);
+                        }
+                    }
+                })
+                .watch()
+                .unwrap();
         });
 
-        let data = self.app_data();
-
-        let mut app = tide::App::new(data);
+        let mut app = tide::App::new(app_data);
         app.at("/").get(index);
+        app.at("/events").get(events);
         app.at("/images/:image").get(image);
         app.serve(format!("127.0.0.1:{}", self.port))?;
 
@@ -58,14 +97,28 @@ impl SubCommand for Serve {
 
 struct AppData {
     project: PathBuf,
+    peanut_gallery: Arc<Mutex<HashMap<usize, mpsc::Sender<events::Event>>>>,
 }
 
 async fn index(_cx: tide::Context<AppData>) -> tide::http::Response<&'static str> {
     tide::http::Response::builder()
         .header(tide::http::header::CONTENT_TYPE, "text/html; charset=utf-8")
         .status(tide::http::StatusCode::OK)
-        .body(include_str!("index.html"))
+        .body(include_str!("static/index.html"))
         .unwrap()
+}
+
+async fn events(
+    cx: tide::Context<AppData>,
+) -> tide::EndpointResult<tide::http::Response<http_service::Body>> {
+    let events = events::EventStream::new(cx.app_data().peanut_gallery.clone());
+    let body = http_service::Body::from_stream(events);
+    Ok(tide::http::Response::builder()
+        .header(tide::http::header::CONTENT_TYPE, "text/event-stream")
+        .header("X-Accel-Buffering", "no")
+        .header("Cache-Control", "no-cache")
+        .body(body)
+        .unwrap())
 }
 
 async fn image(cx: tide::Context<AppData>) -> tide::EndpointResult<tide::http::Response<Vec<u8>>> {

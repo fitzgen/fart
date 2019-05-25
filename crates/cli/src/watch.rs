@@ -16,10 +16,6 @@ pub struct Watch {
 }
 
 impl Watch {
-    pub fn new(project: PathBuf, extra: Vec<String>) -> Watch {
-        Watch { project, extra }
-    }
-
     fn get_terminal_columns(&self) -> usize {
         let tput = || -> Result<usize> {
             let out = process::Command::new("tput").arg("cols").output()?;
