@@ -12,7 +12,8 @@ pub struct Watcher {
     project: PathBuf,
     extra: Vec<String>,
     output: Output,
-    on_rerun: Option<Box<FnMut()>>,
+    on_start: Option<Box<FnMut()>>,
+    on_finish: Option<Box<FnMut()>>,
 }
 
 impl Watcher {
@@ -25,7 +26,8 @@ impl Watcher {
             project,
             extra: Default::default(),
             output: Output::Inherit,
-            on_rerun: None,
+            on_start: None,
+            on_finish: None,
         }
     }
 
@@ -39,8 +41,13 @@ impl Watcher {
         self
     }
 
-    pub fn on_rerun(&mut self, f: impl 'static + FnMut()) -> &mut Self {
-        self.on_rerun = Some(Box::new(f) as Box<FnMut()>);
+    pub fn on_start(&mut self, f: impl 'static + FnMut()) -> &mut Self {
+        self.on_start = Some(Box::new(f) as Box<FnMut()>);
+        self
+    }
+
+    pub fn on_finish(&mut self, f: impl 'static + FnMut()) -> &mut Self {
+        self.on_finish = Some(Box::new(f) as Box<FnMut()>);
         self
     }
 
@@ -89,10 +96,17 @@ impl Watcher {
     }
 
     fn rerun(&mut self) -> Result<()> {
-        if let Some(f) = self.on_rerun.as_mut() {
+        if let Some(f) = self.on_start.as_mut() {
             f();
         }
 
-        Run::new(self.project.clone(), self.extra.clone()).run_with_output(&mut self.output)
+        let result =
+            Run::new(self.project.clone(), self.extra.clone()).run_with_output(&mut self.output);
+
+        if let Some(f) = self.on_finish.as_mut() {
+            f();
+        }
+
+        result
     }
 }

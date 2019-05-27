@@ -1,6 +1,8 @@
 mod events;
 
-use crate::{sub_command::SubCommand, watcher::Watcher, Result};
+use crate::{
+    command_ext::CommandExt, output::Output, sub_command::SubCommand, watcher::Watcher, Result,
+};
 use failure::ResultExt;
 use futures::channel::{mpsc, oneshot};
 use std::collections::HashMap;
@@ -8,6 +10,7 @@ use std::ffi::OsStr;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
+use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use structopt::StructOpt;
@@ -67,11 +70,25 @@ impl SubCommand for Serve {
                         }
                     }
                 })
-                .on_rerun({
+                .on_start({
                     let peanut_gallery = peanut_gallery.clone();
                     move || {
                         let send_rerun = || -> Result<()> {
-                            let event = events::Event::new("rerun".into(), &())
+                            let event = events::Event::new("start".into(), &())
+                                .context("failed to serialize rerun event")?;
+                            futures::executor::block_on(events::broadcast(&peanut_gallery, event))?;
+                            Ok(())
+                        };
+                        if let Err(e) = send_rerun() {
+                            eprintln!("warning: {}", e);
+                        }
+                    }
+                })
+                .on_finish({
+                    let peanut_gallery = peanut_gallery.clone();
+                    move || {
+                        let send_rerun = || -> Result<()> {
+                            let event = events::Event::new("finish".into(), &())
                                 .context("failed to serialize rerun event")?;
                             futures::executor::block_on(events::broadcast(&peanut_gallery, event))?;
                             Ok(())
@@ -88,6 +105,7 @@ impl SubCommand for Serve {
         let mut app = tide::App::new(app_data);
         app.at("/").get(index);
         app.at("/events").get(events);
+        app.at("/rerun").post(rerun);
         app.at("/images/:image").get(image);
         app.serve(format!("127.0.0.1:{}", self.port))?;
 
@@ -121,32 +139,55 @@ async fn events(
         .unwrap())
 }
 
-async fn image(cx: tide::Context<AppData>) -> tide::EndpointResult<tide::http::Response<Vec<u8>>> {
+async fn rerun(cx: tide::Context<AppData>) -> tide::http::Response<String> {
+    // Touch the `src` directory to get the watcher to rebuild. Kinda hacky but
+    // it works!
+    let src = cx.app_data().project.join("src");
+    let touched = Command::new("touch")
+        .arg(src)
+        .run_result(&mut Output::Inherit);
+
+    let mut response = tide::http::Response::builder();
+    response.header(tide::http::header::CONTENT_TYPE, "text/text; charset=utf-8");
+
+    match touched {
+        Ok(_) => response
+            .status(tide::http::StatusCode::OK)
+            .body("".into())
+            .unwrap(),
+        Err(e) => response
+            .status(tide::http::StatusCode::INTERNAL_SERVER_ERROR)
+            .body(e.to_string().into())
+            .unwrap(),
+    }
+}
+
+async fn image(cx: tide::Context<AppData>) -> tide::http::Response<Vec<u8>> {
     let image = cx.param::<PathBuf>("image").unwrap();
     if image.extension() != Some(OsStr::new("svg")) {
-        return Ok(tide::http::Response::builder()
+        return tide::http::Response::builder()
             .status(tide::http::StatusCode::NOT_FOUND)
             .body(vec![])
-            .unwrap());
+            .unwrap();
     }
     let path = cx.app_data().project.join("images").join(image);
     serve_static_file(path).await
 }
 
-async fn serve_static_file(path: PathBuf) -> tide::EndpointResult<tide::http::Response<Vec<u8>>> {
+async fn serve_static_file(path: PathBuf) -> tide::http::Response<Vec<u8>> {
     match read_file(path).await {
-        Ok(contents) => Ok(tide::http::Response::builder()
+        Ok(contents) => tide::http::Response::builder()
             .status(tide::http::StatusCode::OK)
             .body(contents)
-            .unwrap()),
-        Err(e) => Ok(tide::http::Response::builder()
+            .unwrap(),
+        Err(e) => tide::http::Response::builder()
             .status(if e.kind() == io::ErrorKind::NotFound {
                 tide::http::StatusCode::NOT_FOUND
             } else {
                 tide::http::StatusCode::INTERNAL_SERVER_ERROR
             })
             .body(e.to_string().into())
-            .unwrap()),
+            .unwrap(),
     }
 }
 

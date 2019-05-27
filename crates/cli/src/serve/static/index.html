@@ -54,14 +54,6 @@
              background-color: black;
          }
 
-         #theme {
-             margin-bottom: 1em;
-         }
-
-         #theme label, #theme h3 {
-             margin: 0.5em;
-         }
-
          #main {
              width: 100%;
              height: 100%;
@@ -74,6 +66,28 @@
              height: 100%;
              padding: 1em;
              border-right: 0.5px solid;
+         }
+
+         #controls > form {
+             width: 100%;
+             height: 100%;
+         }
+
+         #controls > form > * {
+             margin-top: 3em;
+         }
+
+         fieldset {
+             border: none;
+             width: 100%;
+         }
+
+         #theme {
+             margin-bottom: 1em;
+         }
+
+         #theme label, #theme h3 {
+             margin: 0.5em;
          }
 
          #logs {
@@ -90,11 +104,14 @@
     <body class="hbox">
         <section id="controls" class="vbox">
             <form id="theme" class="vbox">
-                <h3>Theme</h3>
-                <div class="hbox">
-                    <label><input type="radio" name="theme" value="light" checked /> Light</label>
-                    <label><input type="radio" name="theme" value="dark" /> Dark</label>
-                </div>
+                <button id="regenerate"><h3>Regenerate</h3></button>
+                <fieldset class="vbox">
+                    <h3>Theme</h3>
+                    <div class="hbox">
+                        <label><input type="radio" name="theme" value="light" checked /> Light</label>
+                        <label><input type="radio" name="theme" value="dark" /> Dark</label>
+                    </div>
+                </fieldset>
             </form>
         </section>
 
@@ -124,14 +141,28 @@
 
          updateTheme();
 
+         const regenerate = document.getElementById("regenerate");
+
+         regenerate.addEventListener("click", event => {
+             event.preventDefault();
+             fetch("/rerun", { method: "POST" });
+         });
+
          const logs = document.getElementById("logs");
+         const latest = document.getElementById("latest");
          const events = new EventSource("/events");
 
-         events.addEventListener("rerun", _ => logs.textContent = "");
+         events.addEventListener("start", _ => logs.textContent = "");
          events.addEventListener("output", e => {
              const data = JSON.parse(e.data);
              logs.textContent += data + "\n";
          });
+         events.addEventListener("finish", _ => latest.setAttribute("data", "./images/latest.svg"));
+         events.onerror = event => {
+             logs.textContent = `Error: disconnected from ${window.location.host}/events.`;
+             console.error(event);
+             regenerate.setAttribute("disabled", "");
+         };
         </script>
     </body>
 </html>

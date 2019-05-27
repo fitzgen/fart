@@ -38,7 +38,7 @@ impl SubCommand for Watch {
     fn run(self) -> Result<()> {
         Watcher::new(self.project.clone())
             .extra(self.extra.clone())
-            .on_rerun(move || {
+            .on_start(move || {
                 eprintln!("\n\n");
                 for _ in 0..self.get_terminal_columns() {
                     eprint!("▔");
