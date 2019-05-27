@@ -36,7 +36,7 @@ impl Serve {
     fn app_data(&mut self) -> AppData {
         AppData {
             project: self.project.clone(),
-            peanut_gallery: Arc::new(Mutex::new(HashMap::new())),
+            subscribers: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }
@@ -50,19 +50,19 @@ impl SubCommand for Serve {
     fn run(mut self) -> Result<()> {
         let app_data = self.app_data();
 
-        let peanut_gallery = app_data.peanut_gallery.clone();
+        let subscribers = app_data.subscribers.clone();
         let project = self.project.clone();
         let extra = self.extra.clone();
         thread::spawn(move || {
             Watcher::new(project)
                 .extra(extra)
                 .on_output({
-                    let peanut_gallery = peanut_gallery.clone();
+                    let subscribers = subscribers.clone();
                     move |output| {
                         let send_output = || -> Result<()> {
                             let event = events::Event::new("output".into(), output)
                                 .context("failed to serialize output event")?;
-                            futures::executor::block_on(events::broadcast(&peanut_gallery, event))?;
+                            futures::executor::block_on(events::broadcast(&subscribers, event))?;
                             Ok(())
                         };
                         if let Err(e) = send_output() {
@@ -71,12 +71,12 @@ impl SubCommand for Serve {
                     }
                 })
                 .on_start({
-                    let peanut_gallery = peanut_gallery.clone();
+                    let subscribers = subscribers.clone();
                     move || {
                         let send_rerun = || -> Result<()> {
                             let event = events::Event::new("start".into(), &())
                                 .context("failed to serialize rerun event")?;
-                            futures::executor::block_on(events::broadcast(&peanut_gallery, event))?;
+                            futures::executor::block_on(events::broadcast(&subscribers, event))?;
                             Ok(())
                         };
                         if let Err(e) = send_rerun() {
@@ -85,12 +85,12 @@ impl SubCommand for Serve {
                     }
                 })
                 .on_finish({
-                    let peanut_gallery = peanut_gallery.clone();
+                    let subscribers = subscribers.clone();
                     move || {
                         let send_rerun = || -> Result<()> {
                             let event = events::Event::new("finish".into(), &())
                                 .context("failed to serialize rerun event")?;
-                            futures::executor::block_on(events::broadcast(&peanut_gallery, event))?;
+                            futures::executor::block_on(events::broadcast(&subscribers, event))?;
                             Ok(())
                         };
                         if let Err(e) = send_rerun() {
@@ -115,7 +115,7 @@ impl SubCommand for Serve {
 
 struct AppData {
     project: PathBuf,
-    peanut_gallery: Arc<Mutex<HashMap<usize, mpsc::Sender<events::Event>>>>,
+    subscribers: Arc<Mutex<HashMap<usize, mpsc::Sender<events::Event>>>>,
 }
 
 async fn index(_cx: tide::Context<AppData>) -> tide::http::Response<&'static str> {
@@ -129,7 +129,7 @@ async fn index(_cx: tide::Context<AppData>) -> tide::http::Response<&'static str
 async fn events(
     cx: tide::Context<AppData>,
 ) -> tide::EndpointResult<tide::http::Response<http_service::Body>> {
-    let events = events::EventStream::new(cx.app_data().peanut_gallery.clone());
+    let events = events::EventStream::new(cx.app_data().subscribers.clone());
     let body = http_service::Body::from_stream(events);
     Ok(tide::http::Response::builder()
         .header(tide::http::header::CONTENT_TYPE, "text/event-stream")

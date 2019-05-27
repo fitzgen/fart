@@ -35,12 +35,12 @@ impl Event {
 }
 
 pub async fn broadcast(
-    peanut_gallery: &Arc<Mutex<HashMap<usize, mpsc::Sender<Event>>>>,
+    subscribers: &Arc<Mutex<HashMap<usize, mpsc::Sender<Event>>>>,
     event: Event,
 ) -> Result<()> {
     let senders = {
-        let pg = peanut_gallery.lock().unwrap();
-        pg.values().cloned().collect::<Vec<_>>()
+        let subscribers = subscribers.lock().unwrap();
+        subscribers.values().cloned().collect::<Vec<_>>()
     };
     futures::future::join_all(senders.into_iter().map(|mut s| {
         let event = event.clone();
@@ -59,36 +59,36 @@ pub async fn broadcast(
 
 /// A stream of server-sent events.
 ///
-/// Automatically registers itself in the peanut gallery, and removes itself
-/// from the peanut gallery on drop.
+/// Automatically registers itself in the subscribers set, and removes itself
+/// from the subscribers set on drop.
 pub struct EventStream {
     id: usize,
-    peanut_gallery: Arc<Mutex<HashMap<usize, mpsc::Sender<Event>>>>,
+    subscribers: Arc<Mutex<HashMap<usize, mpsc::Sender<Event>>>>,
     receiver: mpsc::Receiver<Event>,
 }
 
 impl Drop for EventStream {
     fn drop(&mut self) {
-        let mut peanut_gallery = self.peanut_gallery.lock().unwrap();
-        peanut_gallery.remove(&self.id);
+        let mut subscribers = self.subscribers.lock().unwrap();
+        subscribers.remove(&self.id);
     }
 }
 
 impl EventStream {
-    pub fn new(peanut_gallery: Arc<Mutex<HashMap<usize, mpsc::Sender<Event>>>>) -> Self {
+    pub fn new(subscribers: Arc<Mutex<HashMap<usize, mpsc::Sender<Event>>>>) -> Self {
         static EVENT_STREAM_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
         let id = EVENT_STREAM_ID_COUNTER.fetch_add(1, Ordering::AcqRel);
 
         let (sender, receiver) = mpsc::channel(16);
 
         {
-            let mut peanut_gallery = peanut_gallery.lock().unwrap();
-            peanut_gallery.insert(id, sender);
+            let mut subscribers = subscribers.lock().unwrap();
+            subscribers.insert(id, sender);
         }
 
         EventStream {
             id,
-            peanut_gallery,
+            subscribers,
             receiver,
         }
     }
