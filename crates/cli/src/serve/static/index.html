@@ -157,7 +157,9 @@
              const data = JSON.parse(e.data);
              logs.textContent += data + "\n";
          });
-         events.addEventListener("finish", _ => latest.setAttribute("data", "./images/latest.svg"));
+         events.addEventListener("finish", _ => {
+             latest.setAttribute("data", `./images/latest.svg?${Date.now()}-${Math.random()}`);
+         });
          events.onerror = event => {
              logs.textContent = `Error: disconnected from ${window.location.host}/events.`;
              console.error(event);
