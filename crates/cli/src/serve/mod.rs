@@ -6,6 +6,7 @@ use crate::{
 use failure::ResultExt;
 use futures::channel::{mpsc, oneshot};
 use std::collections::HashMap;
+use std::env;
 use std::ffi::OsStr;
 use std::fs;
 use std::io;
@@ -37,6 +38,7 @@ impl Serve {
         AppData {
             project: self.project.clone(),
             subscribers: Arc::new(Mutex::new(HashMap::new())),
+            consts: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }
@@ -103,7 +105,18 @@ impl SubCommand for Serve {
         });
 
         let mut app = tide::App::new(app_data);
-        app.at("/").get(index);
+        app.at("/").get(serve_from_memory(
+            "text/html",
+            include_str!("static/index.html"),
+        ));
+        app.at("/styles.css").get(serve_from_memory(
+            "text/css",
+            include_str!("static/styles.css"),
+        ));
+        app.at("/script.js").get(serve_from_memory(
+            "text/javascript",
+            include_str!("static/script.js"),
+        ));
         app.at("/events").get(events);
         app.at("/rerun").post(rerun);
         app.at("/images/:image").get(image);
@@ -116,14 +129,36 @@ impl SubCommand for Serve {
 struct AppData {
     project: PathBuf,
     subscribers: Arc<Mutex<HashMap<usize, mpsc::Sender<events::Event>>>>,
+    consts: Arc<Mutex<HashMap<String, String>>>,
 }
 
-async fn index(_cx: tide::Context<AppData>) -> tide::http::Response<&'static str> {
-    tide::http::Response::builder()
-        .header(tide::http::header::CONTENT_TYPE, "text/html; charset=utf-8")
-        .status(tide::http::StatusCode::OK)
-        .body(include_str!("static/index.html"))
-        .unwrap()
+fn serve_from_memory(
+    content_type: &'static str,
+    body: &'static str,
+) -> impl tide::Endpoint<AppData> {
+    return ServeFromMemory { content_type, body };
+
+    struct ServeFromMemory {
+        content_type: &'static str,
+        body: &'static str,
+    }
+
+    impl<T> tide::Endpoint<T> for ServeFromMemory {
+        type Fut = futures::future::Ready<tide::http::Response<http_service::Body>>;
+
+        fn call(&self, _cx: tide::Context<T>) -> Self::Fut {
+            futures::future::ready(
+                tide::http::Response::builder()
+                    .header(
+                        tide::http::header::CONTENT_TYPE,
+                        format!("{}; charset=utf-8", self.content_type),
+                    )
+                    .status(tide::http::StatusCode::OK)
+                    .body(http_service::Body::from(self.body))
+                    .unwrap(),
+            )
+        }
+    }
 }
 
 async fn events(
@@ -139,16 +174,53 @@ async fn events(
         .unwrap())
 }
 
-async fn rerun(cx: tide::Context<AppData>) -> tide::http::Response<String> {
-    // Touch the `src` directory to get the watcher to rebuild. Kinda hacky but
-    // it works!
-    let src = cx.app_data().project.join("src");
-    let touched = Command::new("touch")
-        .arg(src)
-        .run_result(&mut Output::Inherit);
-
+async fn rerun(mut cx: tide::Context<AppData>) -> tide::http::Response<String> {
     let mut response = tide::http::Response::builder();
     response.header(tide::http::header::CONTENT_TYPE, "text/text; charset=utf-8");
+
+    let vars: HashMap<String, String> = match cx.body_json().await {
+        Ok(vars) => vars,
+        Err(e) => {
+            return response
+                .status(tide::http::StatusCode::BAD_REQUEST)
+                .body(e.to_string().into())
+                .unwrap();
+        }
+    };
+
+    let touched = {
+        let mut consts = cx.app_data().consts.lock().unwrap();
+
+        for (k, v) in vars {
+            let k = format!("FART_USER_CONST_{}", k);
+            env::set_var(&k, &v);
+            consts.insert(k, v);
+        }
+
+        let mut vars = "# fart user consts\n\
+                        #\n\
+                        # To re-establish this user const environment, run:\n\
+                        #\n\
+                        #    $ source user_consts.sh\n\n\
+                        "
+        .to_string();
+        for (k, v) in consts.iter() {
+            vars.push_str(&format!("export {}={}\n", k, v));
+        }
+
+        let vars_path = cx.app_data().project.join("user_consts.sh");
+        let wrote_consts =
+            fs::write(vars_path, vars.as_bytes()).map_err(|e| failure::Error::from(e));
+
+        wrote_consts.and_then(|_| {
+            // Touch the `src` directory to get the watcher to rebuild. Kinda hacky but
+            // it works!
+            let src = cx.app_data().project.join("src");
+            Command::new("touch")
+                .arg(src)
+                .run_result(&mut Output::Inherit)
+        })
+    };
 
     match touched {
         Ok(_) => response

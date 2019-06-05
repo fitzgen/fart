@@ -1,0 +1,96 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.hbox, .vbox {
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+}
+
+.hbox {
+    flex-direction: row;
+}
+
+.vbox {
+    flex-direction: column;
+}
+
+.dark {
+    color: rgb(225, 225, 225);
+    background-color: rgb(42,42,46);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.light {
+    color: black;
+    background-color: rgb(213,213,209);
+    border-color: rgba(0, 0, 0, 0.25);
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+}
+
+#latest {
+    max-width: 90%;
+    max-height: 90%;
+    box-shadow: 5px 5px 20px black;
+    margin: 2em;
+}
+
+.light #latest {
+    background-color: white;
+}
+.dark #latest {
+    background-color: black;
+}
+
+#main {
+    width: 100%;
+    height: 100%;
+}
+
+#controls {
+    min-width: 20em;
+    width: calc(25vw - 2 * 1em);
+    max-width: 30em;
+    height: 100%;
+    padding: 1em;
+    border-right: 0.5px solid;
+}
+
+#controls > * {
+    margin-top: 3em;
+    width: 100%;
+}
+
+fieldset {
+    border: none;
+    width: 100%;
+}
+
+#controls label, #controls h3 {
+    margin: 0.5em;
+}
+
+#user-consts > h3:only-child {
+    display: none;
+}
+
+#user-consts label {
+    font-family: monospace;
+    white-space: pre;
+}
+
+#logs {
+    border-top: 0.5px solid;
+    padding: 2em;
+    max-height: 30vh;
+    min-height: 5em;
+    white-space: pre;
+    font-family: monospace;
+    width: calc(100% - 2 * 2em);
+}

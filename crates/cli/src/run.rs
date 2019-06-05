@@ -76,7 +76,12 @@ where
     fs::hard_link(img, &latest)
         .with_context(|_| format!("failed to link {} to {}", img.display(), latest.display()))?;
 
-    writeln!(output, "\nLinked {} to {}", img.display(), latest.display())?;
+    writeln!(
+        output,
+        "\nLinked {} to {}\n",
+        img.display(),
+        latest.display()
+    )?;
 
     Ok(())
 }

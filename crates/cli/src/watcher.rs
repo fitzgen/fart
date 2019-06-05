@@ -12,8 +12,8 @@ pub struct Watcher {
     project: PathBuf,
     extra: Vec<String>,
     output: Output,
-    on_start: Option<Box<FnMut()>>,
-    on_finish: Option<Box<FnMut()>>,
+    on_start: Option<Box<dyn FnMut()>>,
+    on_finish: Option<Box<dyn FnMut()>>,
 }
 
 impl Watcher {
@@ -42,12 +42,12 @@ impl Watcher {
     }
 
     pub fn on_start(&mut self, f: impl 'static + FnMut()) -> &mut Self {
-        self.on_start = Some(Box::new(f) as Box<FnMut()>);
+        self.on_start = Some(Box::new(f) as Box<dyn FnMut()>);
         self
     }
 
     pub fn on_finish(&mut self, f: impl 'static + FnMut()) -> &mut Self {
-        self.on_finish = Some(Box::new(f) as Box<FnMut()>);
+        self.on_finish = Some(Box::new(f) as Box<dyn FnMut()>);
         self
     }
 
@@ -87,9 +87,9 @@ impl Watcher {
             while let Ok(_) = rx.try_recv() {}
 
             if let Err(e) = self.rerun() {
-                write!(&mut self.output, "Warning: {}", e)?;
+                writeln!(&mut self.output, "Warning: {}", e)?;
                 for c in e.iter_causes() {
-                    write!(&mut self.output, "    Caused by: {}", c)?;
+                    writeln!(&mut self.output, "    Caused by: {}", c)?;
                 }
             }
         }

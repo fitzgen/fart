@@ -1,9 +1,6 @@
 use crate::{output::Output, Result};
 use failure::{bail, ResultExt};
-use std::{
-    io::{self, BufRead, Write},
-    process, thread,
-};
+use std::{io, process, thread};
 
 /// Extension trait for `std::process::Command`.
 pub trait CommandExt {
@@ -60,11 +57,8 @@ where
 {
     thread::spawn(move || {
         let do_read = move || -> Result<()> {
-            let r = io::BufReader::new(r);
-            for line in r.lines() {
-                let line = line?;
-                output.write_all(line.as_bytes())?;
-            }
+            let mut r = io::BufReader::new(r);
+            io::copy(&mut r, &mut output)?;
             Ok(())
         };
 

@@ -4,13 +4,12 @@ use std::sync::{Arc, Mutex};
 #[derive(Clone)]
 pub enum Output {
     Inherit,
-    Pipe(Arc<Mutex<FnMut(&str) + Send + 'static>>),
+    Pipe(Arc<Mutex<dyn FnMut(&str) + Send + 'static>>),
 }
 
 impl Write for Output {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         io::stderr().write_all(buf)?;
-        io::stderr().write_all(b"\n")?;
 
         if let Output::Pipe(f) = self {
             let mut f = f.lock().unwrap();
