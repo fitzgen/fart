@@ -14,7 +14,7 @@ pub struct SceneSpace;
 #[derive(Debug)]
 pub struct Scene {
     view: Aabb<i64, SceneSpace>,
-    shapes: Arena<Box<Shape<i64, SceneSpace>>>,
+    shapes: Arena<Box<dyn Shape<i64, SceneSpace>>>,
     paths: Vec<Path<i64, SceneSpace>>,
     bounding_boxes: AabbTree<i64, SceneSpace, ShapeId>,
     stroke_width: i64,

@@ -11,7 +11,7 @@ use id_arena::Id;
 use std::fmt::Debug;
 
 /// An identifier for a shape that has been added to a `Scene`.
-pub type ShapeId = Id<Box<Shape<i64, SceneSpace>>>;
+pub type ShapeId = Id<Box<dyn Shape<i64, SceneSpace>>>;
 
 /// Any kind of shape!
 pub trait Shape<T, U>: Debug {
