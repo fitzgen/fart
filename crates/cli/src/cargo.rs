@@ -33,6 +33,7 @@ where
         .arg("--manifest-path")
         .arg(dir.as_ref().join("Cargo.toml"))
         .args(args)
+        .env("RUST_BACKTRACE", "1")
         .envs(envs)
         .run_result(output)
 }
