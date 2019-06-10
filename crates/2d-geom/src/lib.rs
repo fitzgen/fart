@@ -616,6 +616,16 @@ where
 
         ps.zip(qs).map(|(p, q)| line(p, q))
     }
+
+    /// Get the `idx`th edge.
+    ///
+    /// This is the edge from vertex `idx` to vertex `idx + 1`.
+    pub fn edge(&self, idx: usize) -> Line<T, U> {
+        assert!(idx < self.vertices.len());
+        let a = self.vertices()[idx];
+        let b = self.vertices()[self.next(idx)];
+        line(a, b)
+    }
 }
 
 /// A convex polygon.
