@@ -3,7 +3,7 @@
 pub use crate::{
     path::{LineCommand, Path},
     scene::{Inches, Scene, SceneSpace},
-    shape::{Shape, ShapeId, Triangle},
+    shape::{Shape, ShapeId, Triangle, ShapeExt},
     user_const,
 };
 pub use euclid::{point2, vec2};
