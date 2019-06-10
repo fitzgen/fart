@@ -662,6 +662,13 @@ impl<T, U> DerefMut for ConvexPolygon<T, U> {
     }
 }
 
+impl<T, U> From<ConvexPolygon<T, U>> for Polygon<T, U> {
+    #[inline]
+    fn from(c: ConvexPolygon<T, U>) -> Polygon<T, U> {
+        c.inner
+    }
+}
+
 impl<T, U> ConvexPolygon<T, U>
 where
     T: Copy + NumAssign + PartialOrd + Signed + Bounded + fmt::Debug,
