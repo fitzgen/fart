@@ -203,7 +203,7 @@ where
         assert!(vertices.len() >= 3);
         assert!(
             is_counter_clockwise(&vertices),
-            "vertices = {:#?}",
+            "vertices are not counter clockwise: {:#?}",
             vertices
         );
         Polygon { vertices }
