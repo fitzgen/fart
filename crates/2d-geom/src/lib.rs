@@ -3,6 +3,7 @@
 #![deny(missing_docs, missing_debug_implementations)]
 
 use euclid::{point2, TypedPoint2D};
+use fart_aabb::{Aabb, ToAabb};
 use fart_utils::NoMorePartial;
 use num_traits::{Bounded, Num, NumAssign, NumCast, Signed};
 use partial_min_max::{max, min};
@@ -628,6 +629,15 @@ where
     }
 }
 
+impl<T, U> ToAabb<T, U> for Polygon<T, U>
+where
+    T: Copy + Num + PartialOrd,
+{
+    fn to_aabb(&self) -> Aabb<T, U> {
+        Aabb::for_vertices(self.vertices.iter().cloned())
+    }
+}
+
 /// A convex polygon.
 ///
 /// This is a thin newtype wrapper over `Polygon`, and dereferences to the
@@ -818,6 +828,15 @@ where
     /// ```
     pub fn improperly_contains_point(&self, point: TypedPoint2D<T, U>) -> bool {
         self.edges().all(|e| e.is_left_or_collinear(point))
+    }
+}
+
+impl<T, U> ToAabb<T, U> for ConvexPolygon<T, U>
+where
+    T: Copy + Num + PartialOrd,
+{
+    fn to_aabb(&self) -> Aabb<T, U> {
+        self.inner.to_aabb()
     }
 }
 
@@ -1079,5 +1098,16 @@ where
             || self.is_on(other.b)
             || other.is_on(self.a)
             || other.is_on(self.b)
+    }
+}
+
+impl<T, U> ToAabb<T, U> for Line<T, U>
+where
+    T: Copy + Num + PartialOrd,
+{
+    fn to_aabb(&self) -> Aabb<T, U> {
+        let min = point2(min(self.a.x, self.b.x), min(self.a.y, self.b.y));
+        let max = point2(max(self.a.x, self.b.x), max(self.a.y, self.b.y));
+        Aabb::new(min, max)
     }
 }

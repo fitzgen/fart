@@ -307,3 +307,15 @@ where
         }
     }
 }
+
+/// Things that have an axis-aligned bounding box.
+///
+/// While we can construct an AABB from anything with vertices, implementations
+/// of this trait are intended to be the fastest way to get an AABB for the
+/// given `Self` type. For example, we can compute the AABB of a circle
+/// geometrically faster than by sampling points along it and constructing the
+/// AABB of those sampled points.
+pub trait ToAabb<T, U> {
+    /// Get the axis-aligned bounding box for `self`.
+    fn to_aabb(&self) -> Aabb<T, U>;
+}
