@@ -5,7 +5,11 @@
 
 use crate::scene::SceneSpace;
 use euclid::{TypedPoint2D, TypedVector2D};
+use num_traits::{NumAssign, Signed};
+use std::borrow::Cow;
 use std::fmt::Debug;
+use std::iter;
+use std::marker::PhantomData;
 
 /// A series of line commands that describe a path.
 #[derive(Clone, Debug)]
@@ -215,3 +219,130 @@ where
             .set("d", data)
     }
 }
+
+/// Anything that can render as one or more `Path`s.
+///
+/// This is implemented for `fart::geom::Polygon` and
+/// `fart::geom::ConvexPolygon`, and draws the outline of the polygon. It is
+/// also implemented for `fart::geom::Line`, and draws just the line.
+pub trait ToPaths<T, U> {
+    /// An iterator over this thing's paths.
+    type Paths: Iterator<Item = Path<T, U>>;
+
+    /// Render this thing as `Path`s.
+    fn to_paths(&self) -> Self::Paths;
+}
+
+impl<T, U> ToPaths<T, U> for fart_2d_geom::Polygon<T, U>
+where
+    T: Copy + NumAssign + PartialOrd + Signed + Debug,
+{
+    type Paths = iter::Once<Path<T, U>>;
+
+    fn to_paths(&self) -> Self::Paths {
+        let mut commands = Vec::with_capacity(self.vertices().len() + 1);
+
+        let mut first = true;
+        for v in self.vertices() {
+            commands.push(if first {
+                first = false;
+                LineCommand::MoveTo(*v)
+            } else {
+                LineCommand::LineTo(*v)
+            });
+        }
+        commands.push(LineCommand::Close);
+
+        iter::once(Path::with_commands(commands))
+    }
+}
+
+impl<T, U> ToPaths<T, U> for fart_2d_geom::ConvexPolygon<T, U>
+where
+    T: Copy + NumAssign + PartialOrd + Signed + Debug,
+{
+    type Paths = <fart_2d_geom::Polygon<T, U> as ToPaths<T, U>>::Paths;
+
+    fn to_paths(&self) -> Self::Paths {
+        let p: &fart_2d_geom::Polygon<T, U> = self.as_ref();
+        p.to_paths()
+    }
+}
+
+impl<T, U> ToPaths<T, U> for fart_2d_geom::Line<T, U>
+where
+    T: Clone,
+{
+    type Paths = iter::Once<Path<T, U>>;
+
+    fn to_paths(&self) -> Self::Paths {
+        iter::once(Path::with_commands(vec![
+            LineCommand::MoveTo(self.a.clone()),
+            LineCommand::LineTo(self.b.clone()),
+        ]))
+    }
+}
+
+/// A `ToPaths` wrapper type that forces all of the paths produced by the inner
+/// type to be of a certain color. Created using `ToPathsExt::color`.
+#[derive(Debug, Clone)]
+pub struct Color<P> {
+    inner: P,
+    color: Cow<'static, str>,
+}
+
+/// An iterator over paths produced by `Color<P>`. Created via `<Color<P> as
+/// ToPaths<_, _>>::to_paths()`.
+#[derive(Clone, Debug)]
+pub struct ColorPaths<P, T, U> {
+    inner: P,
+    color: Cow<'static, str>,
+    _phantom: PhantomData<fn() -> Path<T, U>>,
+}
+
+impl<P, T, U> Iterator for ColorPaths<P, T, U>
+where
+    P: Iterator<Item = Path<T, U>>,
+{
+    type Item = Path<T, U>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut path = self.inner.next()?;
+        path.color = self.color.clone().into();
+        Some(path)
+    }
+}
+
+impl<P, T, U> ToPaths<T, U> for Color<P>
+where
+    P: ToPaths<T, U>,
+{
+    type Paths = ColorPaths<P::Paths, T, U>;
+
+    fn to_paths(&self) -> Self::Paths {
+        let inner = self.inner.to_paths();
+        let color = self.color.clone();
+        ColorPaths {
+            inner,
+            color,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+/// An extension trait for shapes to add various helper utilities.
+pub trait ToPathsExt<T, U>: ToPaths<T, U> {
+    /// Force this shape's paths to be of the given color.
+    fn color<C>(self, color: C) -> Color<Self>
+    where
+        C: Into<Cow<'static, str>>,
+        Self: Sized,
+    {
+        Color {
+            inner: self,
+            color: color.into(),
+        }
+    }
+}
+
+impl<S, T, U> ToPathsExt<T, U> for S where S: ToPaths<T, U> {}
