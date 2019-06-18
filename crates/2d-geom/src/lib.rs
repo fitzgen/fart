@@ -648,6 +648,12 @@ where
     }
 }
 
+impl<T, U> AsRef<Polygon<T, U>> for ConvexPolygon<T, U> {
+    fn as_ref(&self) -> &Polygon<T, U> {
+        &self.inner
+    }
+}
+
 impl<T, U> Deref for ConvexPolygon<T, U> {
     type Target = Polygon<T, U>;
 
