@@ -5,7 +5,7 @@
 
 use crate::canvas::CanvasSpace;
 use euclid::{TypedPoint2D, TypedVector2D};
-use num_traits::{NumAssign, Signed};
+use num_traits::{Num, NumAssign, Signed};
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::iter;
@@ -279,6 +279,23 @@ where
         iter::once(Path::with_commands(vec![
             LineCommand::MoveTo(self.a.clone()),
             LineCommand::LineTo(self.b.clone()),
+        ]))
+    }
+}
+
+impl<T, U> ToPaths<T, U> for fart_aabb::Aabb<T, U>
+where
+    T: Copy + Num + PartialOrd,
+{
+    type Paths = iter::Once<Path<T, U>>;
+
+    fn to_paths(&self) -> Self::Paths {
+        iter::once(Path::with_commands(vec![
+            LineCommand::MoveTo(self.min()),
+            LineCommand::HorizontalLineBy(self.width()),
+            LineCommand::VerticalLineBy(self.height()),
+            LineCommand::HorizontalLineTo(self.min().x),
+            LineCommand::Close,
         ]))
     }
 }

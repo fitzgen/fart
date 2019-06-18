@@ -132,7 +132,7 @@ where
 }
 
 /// A tree mapping from axis-aligned bounding boxes to `T` values.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AabbTree<T, U, V> {
     root: Option<AabbTreeNode<T, U, V>>,
 }
