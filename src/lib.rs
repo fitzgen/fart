@@ -97,8 +97,6 @@ impl Config {
 ///
 /// ```no_run
 /// # #![allow(warnings)]
-/// extern crate fart;
-///
 /// fn main() {
 ///     fart::generate(|cfg| {
 ///         unimplemented!("Your code here...")
