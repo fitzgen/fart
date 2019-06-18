@@ -3,7 +3,7 @@
 ///
 ///
 /// ```
-/// user_const! {
+/// fart::user_const! {
 ///     const NUMBER_OF_PARTICLES: usize = 1234;
 /// }
 /// ```
