@@ -1,8 +1,8 @@
 //! The most common functionality re-exported.
 
 pub use crate::{
+    canvas::{Canvas, CanvasSpace, Inches, Millis},
     path::{LineCommand, Path, ToPaths},
-    scene::{Inches, Scene, SceneSpace},
     user_const,
 };
 pub use euclid::{point2, vec2};

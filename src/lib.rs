@@ -9,7 +9,7 @@
 //!
 //! fn main() {
 //!     fart::generate(|cfg| {
-//!         let mut scene = Scene::new(Aabb::new(
+//!         let mut canvas = Canvas::new(Aabb::new(
 //!             point2(0, 0),
 //!             point2(1000, 1000),
 //!         ));
@@ -23,18 +23,18 @@
 //!             point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
 //!         ]);
 //!
-//!         scene.draw(&triangle);
+//!         canvas.draw(&triangle);
 //!
-//!         Ok(scene.create_svg(Inches(7.0), Inches(7.0)))
+//!         Ok(canvas.create_svg(Millis(200.0), Millis(200.0)))
 //!     });
 //! }
 //! ```
 
 #![deny(missing_docs, missing_debug_implementations)]
 
+pub mod canvas;
 pub mod path;
 pub mod prelude;
-pub mod scene;
 
 mod user_const;
 

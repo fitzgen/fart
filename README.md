@@ -28,7 +28,7 @@
 - [Library](#library)
   - [Modules](#modules)
     - [`fart::prelude`](#fartprelude)
-    - [`fart::scene`](#fartscene)
+    - [`fart::canvas`](#fartcanvas)
     - [`fart::shape`](#fartshape)
     - [`fart::path`](#fartpath)
     - [`fart::aabb`](#fartaabb)
@@ -118,10 +118,9 @@ Intended for most projects to glob import the whole thing:
 use fart::prelude::*;
 ```
 
-#### `fart::scene`
+#### `fart::canvas`
 
-A scene is a collection of shapes, which can be rendered into an SVG. A `fart`
-project's main function generates a scene.
+A canvas is a collection of drawn paths, which can be rendered into an SVG.
 
 #### `fart::shape`
 

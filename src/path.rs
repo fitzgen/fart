@@ -3,7 +3,7 @@
 //! Everything in a scene is eventually lowered into a series of paths, which
 //! are finally compiled to SVG.
 
-use crate::scene::SceneSpace;
+use crate::canvas::CanvasSpace;
 use euclid::{TypedPoint2D, TypedVector2D};
 use num_traits::{NumAssign, Signed};
 use std::borrow::Cow;
@@ -175,11 +175,11 @@ impl<T, U> Path<T, U> {
     }
 }
 
-impl<'a, T> From<&'a Path<T, SceneSpace>> for svg::node::element::Path
+impl<'a, T> From<&'a Path<T, CanvasSpace>> for svg::node::element::Path
 where
     T: Copy + Debug + Into<svg::node::element::path::Parameters>,
 {
-    fn from(path: &'a Path<T, SceneSpace>) -> svg::node::element::Path {
+    fn from(path: &'a Path<T, CanvasSpace>) -> svg::node::element::Path {
         let mut data = svg::node::element::path::Data::new();
         for cmd in &path.commands {
             data = match cmd {
