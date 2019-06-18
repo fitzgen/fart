@@ -1,22 +1,17 @@
 //! A scene of shapes.
 
-use crate::aabb::{Aabb, AabbTree};
-use crate::path::Path;
-use crate::shape::{Shape, ShapeId};
-use id_arena::Arena;
+use crate::aabb::Aabb;
+use crate::path::{Path, ToPaths};
 
 /// Unit for things within the scene space.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SceneSpace;
 
-/// A scene is a collection of shapes, their rendered paths, and all the shapes'
-/// AABBs.
+/// A scene is a collection of rendered paths.
 #[derive(Debug)]
 pub struct Scene {
     view: Aabb<i64, SceneSpace>,
-    shapes: Arena<Box<dyn Shape<i64, SceneSpace>>>,
     paths: Vec<Path<i64, SceneSpace>>,
-    bounding_boxes: AabbTree<i64, SceneSpace, ShapeId>,
     stroke_width: i64,
 }
 
@@ -26,9 +21,7 @@ impl Scene {
         let stroke_width = view.width() / 500;
         Scene {
             view,
-            shapes: Arena::new(),
             paths: Vec::new(),
-            bounding_boxes: AabbTree::new(),
             stroke_width,
         }
     }
@@ -49,33 +42,12 @@ impl Scene {
         &self.view
     }
 
-    /// Get the AABB tree for every shape that has been added to the scene.
-    pub fn aabb_tree(&self) -> &AabbTree<i64, SceneSpace, ShapeId> {
-        &self.bounding_boxes
-    }
-
-    /// Add the given shape to the scene.
-    ///
-    /// If the shape's bounding box does not intersect with the scene's
-    /// viewport, then the shape's paths are ignored.
-    pub fn add<S>(&mut self, shape: S) -> ShapeId
+    /// Add the given paths to the scene.
+    pub fn draw<P>(&mut self, paths: &P)
     where
-        S: 'static + Shape<i64, SceneSpace>,
+        P: ToPaths<i64, SceneSpace>,
     {
-        let aabb = shape.aabb();
-        if self.view.intersects(&aabb) {
-            self.paths.extend(shape.paths());
-        }
-        let id = self.shapes.alloc(Box::new(shape));
-        self.bounding_boxes.insert(aabb, id);
-        id
-    }
-
-    /// Get a reference to a shape that was previously inserted into the scene
-    /// with the `add` method.
-    #[inline]
-    pub fn get(&self, id: ShapeId) -> Option<&dyn Shape<i64, SceneSpace>> {
-        self.shapes.get(id).map(|s| &**s)
+        self.paths.extend(paths.to_paths());
     }
 
     /// Render this scene as an SVG with the given physical width and height.

@@ -17,11 +17,13 @@
 //!         let x_dist = Uniform::new(0, 1000);
 //!         let y_dist = Uniform::new(0, 1000);
 //!
-//!         scene.add(Triangle {
-//!             a: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
-//!             b: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
-//!             c: point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
-//!         });
+//!         let triangle = fart::geom::Polygon::new(vec![
+//!             point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!             point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!             point2(x_dist.sample(cfg.rng()), y_dist.sample(cfg.rng())),
+//!         ]);
+//!
+//!         scene.draw(&triangle);
 //!
 //!         Ok(scene.create_svg(Inches(7.0), Inches(7.0)))
 //!     });
@@ -33,7 +35,6 @@
 pub mod path;
 pub mod prelude;
 pub mod scene;
-pub mod shape;
 
 mod user_const;
 
