@@ -1,7 +1,8 @@
 //! A canvas for drawing paths on.
 
 use crate::aabb::Aabb;
-use crate::path::{Path, ToPaths};
+use crate::path::{LineCommand, Path, ToPaths};
+use euclid::point2;
 
 /// Unit for things within the canvas space.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -41,6 +42,75 @@ impl Canvas {
     #[inline]
     pub fn view(&self) -> &Aabb<i64, CanvasSpace> {
         &self.view
+    }
+
+    /// Set this canvas's view.
+    pub fn set_view(&mut self, view: Aabb<i64, CanvasSpace>) {
+        self.view = view;
+    }
+
+    /// Make this canvas's view the bounding box of all the paths that have been
+    /// added to the canvas.
+    pub fn fit_view_to_paths(&mut self) {
+        if self.paths.is_empty() {
+            return;
+        }
+
+        let mut min_x = 0;
+        let mut min_y = 0;
+        let mut max_x = 0;
+        let mut max_y = 0;
+
+        let mut process_point = |p: &euclid::TypedPoint2D<i64, CanvasSpace>| {
+            min_x = std::cmp::min(min_x, p.x);
+            min_y = std::cmp::min(min_y, p.y);
+            max_x = std::cmp::max(max_x, p.x);
+            max_y = std::cmp::max(max_y, p.y);
+        };
+
+        for path in self.paths.iter() {
+            for cmd in path.commands.iter() {
+                match cmd {
+                    LineCommand::MoveTo(p)
+                    | LineCommand::LineTo(p)
+                    | LineCommand::SmoothQuadtraticCurveTo(p) => process_point(p),
+
+                    LineCommand::CubicBezierTo {
+                        control_1,
+                        control_2,
+                        end,
+                    } => {
+                        process_point(control_1);
+                        process_point(control_2);
+                        process_point(end);
+                    }
+
+                    LineCommand::SmoothCubicBezierTo { control, end }
+                    | LineCommand::QuadraticBezierTo { control, end } => {
+                        process_point(control);
+                        process_point(end);
+                    }
+
+                    LineCommand::Close => {}
+
+                    LineCommand::MoveBy(_)
+                    | LineCommand::LineBy(_)
+                    | LineCommand::HorizontalLineTo(_)
+                    | LineCommand::HorizontalLineBy(_)
+                    | LineCommand::VerticalLineTo(_)
+                    | LineCommand::VerticalLineBy(_)
+                    | LineCommand::CubicBezierBy { .. }
+                    | LineCommand::SmoothCubicBezierBy { .. }
+                    | LineCommand::QuadraticBezierBy { .. }
+                    | LineCommand::SmoothQuadtraticCurveBy(_)
+                    | LineCommand::ArcTo { .. }
+                    | LineCommand::ArcBy { .. } => unimplemented!(),
+                }
+            }
+        }
+
+        let view = Aabb::new(point2(min_x, min_y), point2(max_x, max_y));
+        self.set_view(view);
     }
 
     /// Add the given paths to the canvas.
