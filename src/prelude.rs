@@ -4,7 +4,7 @@ pub use crate::{
     canvas::{Canvas, CanvasSpace, Inches, Millis},
     path::{LineCommand, Path, ToPaths},
     system::System,
-    user_const,
+    user_const, Config,
 };
 pub use euclid::{point2, vec2};
 pub use fart_aabb::{Aabb, ToAabb};
