@@ -30,6 +30,17 @@ impl<T, U> Default for Path<T, U> {
     }
 }
 
+impl<T, U> ToPaths<T, U> for Path<T, U>
+where
+    Self: Clone,
+{
+    type Paths = iter::Once<Self>;
+
+    fn to_paths(&self) -> Self::Paths {
+        iter::once(self.clone())
+    }
+}
+
 /// An individual line command segment within a `Path`.
 #[derive(Clone, Debug)]
 pub enum LineCommand<T, U> {
