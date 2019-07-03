@@ -267,6 +267,220 @@ where
     }
 }
 
+impl<U> Line<f64, U> {
+    /// Get the intersection between two line segments.
+    ///
+    /// The kind of intersection is broken down by whether it is proper,
+    /// improper, or collinear. If you don't care what kind of intersection it
+    /// is, use `LineIntersection::point` to just get the point of intersection,
+    /// if any.
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use fart_2d_geom::{Line, LineIntersection};
+    ///
+    /// let line = |a, b| -> Line<f64, UnknownUnit> {
+    ///     Line::new(a, b)
+    /// };
+    ///
+    /// // No intersection.
+    /// assert_eq!(
+    ///     line(
+    ///         point2(0.0, 0.0),
+    ///         point2(5.0, 5.0),
+    ///     ).intersection(&line(
+    ///         point2(0.0, 3.0),
+    ///         point2(1.0, 3.0),
+    ///     )),
+    ///     LineIntersection::None,
+    /// );
+    ///
+    /// // Proper intersection.
+    /// assert_eq!(
+    ///     line(
+    ///         point2(0.0, 0.0),
+    ///         point2(5.0, 5.0),
+    ///     ).intersection(&line(
+    ///         point2(0.0, 2.0),
+    ///         point2(2.0, 0.0),
+    ///     )),
+    ///     LineIntersection::Proper(point2(1.0, 1.0)),
+    /// );
+    ///
+    /// // Improper intersection.
+    /// assert_eq!(
+    ///     line(
+    ///         point2(0.0, 0.0),
+    ///         point2(5.0, 5.0),
+    ///     ).intersection(&line(
+    ///         point2(5.0, 5.0),
+    ///         point2(2.0, 0.0),
+    ///     )),
+    ///     LineIntersection::Improper(point2(5.0, 5.0)),
+    /// );
+    ///
+    /// // Collinear intersection.
+    /// assert_eq!(
+    ///     line(
+    ///         point2(0.0, 0.0),
+    ///         point2(5.0, 5.0),
+    ///     ).intersection(&line(
+    ///         point2(3.0, 3.0),
+    ///         point2(7.0, 7.0),
+    ///     )),
+    ///     LineIntersection::Collinear(point2(3.0, 3.0)),
+    /// );
+    ///
+    /// // Don't care what kind, just give me the point!
+    /// assert_eq!(
+    ///     line(
+    ///         point2(0.0, 0.0),
+    ///         point2(5.0, 5.0),
+    ///     ).intersection(&line(
+    ///         point2(0.0, 3.0),
+    ///         point2(1.0, 3.0),
+    ///     )).point(),
+    ///     None,
+    /// );
+    /// assert_eq!(
+    ///     line(
+    ///         point2(0.0, 0.0),
+    ///         point2(5.0, 5.0),
+    ///     ).intersection(&line(
+    ///         point2(0.0, 2.0),
+    ///         point2(2.0, 0.0),
+    ///     )).point(),
+    ///     Some(point2(1.0, 1.0)),
+    /// );
+    /// ```
+    pub fn intersection(&self, other: &Line<f64, U>) -> LineIntersection<U> {
+        let denominator = self.a.x * (other.b.y - other.a.y)
+            + self.b.x * (other.a.y - other.b.y)
+            + other.b.x * (self.b.y - self.a.y)
+            + other.a.x * (self.a.y - self.b.y);
+
+        if denominator == 0.0 {
+            return self.parallel_intersection(other);
+        }
+
+        let numerator = self.a.x * (other.b.y - other.a.y)
+            + other.a.x * (self.a.y - other.b.y)
+            + other.b.x * (other.a.y - self.a.y);
+
+        let s = numerator / denominator;
+
+        let numerator = -(self.a.x * (other.a.y - self.b.y)
+            + self.b.x * (self.a.y - other.a.y)
+            + other.a.x * (self.b.y - self.a.y));
+
+        let t = numerator / denominator;
+
+        let p = self.a.lerp(self.b, s);
+
+        if numerator == 0.0 || numerator == denominator {
+            LineIntersection::Improper(p)
+        } else if 0.0 < s && s < 1.0 && 0.0 < t && t < 1.0 {
+            LineIntersection::Proper(p)
+        } else {
+            LineIntersection::None
+        }
+    }
+
+    fn parallel_intersection(&self, other: &Line<f64, U>) -> LineIntersection<U> {
+        let between = |l: &Self, p: euclid::TypedPoint2D<f64, U>| {
+            if l.a.x != l.b.x {
+                (l.a.x <= p.x && p.x <= l.b.x) || (l.b.x <= p.x && p.x <= l.a.x)
+            } else {
+                (l.a.y <= p.y && p.y <= l.b.y) || (l.b.y <= p.y && p.y <= l.a.y)
+            }
+        };
+
+        if !self.is_collinear(other.a) {
+            LineIntersection::None
+        } else if between(self, other.a) {
+            LineIntersection::Collinear(other.a)
+        } else if between(self, other.b) {
+            LineIntersection::Collinear(other.a)
+        } else if between(other, self.a) {
+            LineIntersection::Collinear(self.a)
+        } else if between(other, self.b) {
+            LineIntersection::Collinear(self.b)
+        } else {
+            LineIntersection::None
+        }
+    }
+}
+
+/// The result of `Line::intersection` providing the intersection point between
+/// two line segments, if any.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum LineIntersection<U> {
+    /// The line segments do not intersect.
+    None,
+
+    /// The line segments properly intersect at the given point, and are not
+    /// collinear.
+    Proper(euclid::TypedPoint2D<f64, U>),
+
+    /// The line segments improperly intersect and are not collinear, with the
+    /// endpoint of one line segment landing on the other.
+    Improper(euclid::TypedPoint2D<f64, U>),
+
+    /// The lines are collinear and intersect at the given point (and perhaps
+    /// infinitely many other points as well).
+    Collinear(euclid::TypedPoint2D<f64, U>),
+}
+
+impl<U> LineIntersection<U> {
+    /// Is this a `LineIntersection::None`?
+    #[inline]
+    pub fn is_none(&self) -> bool {
+        match self {
+            LineIntersection::None => true,
+            _ => false,
+        }
+    }
+
+    /// Is this a `LineIntersection::Proper`?
+    #[inline]
+    pub fn is_proper(&self) -> bool {
+        match self {
+            LineIntersection::Proper(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Is this a `LineIntersection::Improper`?
+    #[inline]
+    pub fn is_improper(&self) -> bool {
+        match self {
+            LineIntersection::Improper(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Is this a `LineIntersection::Collinear`?
+    #[inline]
+    pub fn is_collinear(&self) -> bool {
+        match self {
+            LineIntersection::Collinear(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Get the intersection point, if any, regardless if this is a proper,
+    /// improper, or collinear intersection.
+    #[inline]
+    pub fn point(&self) -> Option<euclid::TypedPoint2D<f64, U>> {
+        match *self {
+            LineIntersection::None => None,
+            LineIntersection::Proper(p)
+            | LineIntersection::Improper(p)
+            | LineIntersection::Collinear(p) => Some(p),
+        }
+    }
+}
+
 impl<T, U> ToAabb<T, U> for Line<T, U>
 where
     T: Copy + Num + PartialOrd,
