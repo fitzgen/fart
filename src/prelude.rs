@@ -2,7 +2,7 @@
 
 pub use crate::{
     canvas::{Canvas, CanvasSpace, Inches, Millis},
-    path::{LineCommand, Path, ToPaths},
+    path::{LineCommand, Path, ToPaths, ToPathsExt},
     system::System,
     user_const, Config,
 };
