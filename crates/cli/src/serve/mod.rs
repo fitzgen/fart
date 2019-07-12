@@ -104,7 +104,7 @@ impl SubCommand for Serve {
                 .unwrap();
         });
 
-        let mut app = tide::App::new(app_data);
+        let mut app = tide::App::with_state(app_data);
         app.at("/").get(serve_from_memory(
             "text/html",
             include_str!("static/index.html"),
@@ -120,7 +120,7 @@ impl SubCommand for Serve {
         app.at("/events").get(events);
         app.at("/rerun").post(rerun);
         app.at("/images/:image").get(image);
-        app.serve(format!("127.0.0.1:{}", self.port))?;
+        futures::executor::block_on(app.serve(format!("127.0.0.1:{}", self.port)))?;
 
         Ok(())
     }
@@ -164,7 +164,7 @@ fn serve_from_memory(
 async fn events(
     cx: tide::Context<AppData>,
 ) -> tide::EndpointResult<tide::http::Response<http_service::Body>> {
-    let events = events::EventStream::new(cx.app_data().subscribers.clone());
+    let events = events::EventStream::new(cx.state().subscribers.clone());
     let body = http_service::Body::from_stream(events);
     Ok(tide::http::Response::builder()
         .header(tide::http::header::CONTENT_TYPE, "text/event-stream")
@@ -189,7 +189,7 @@ async fn rerun(mut cx: tide::Context<AppData>) -> tide::http::Response<String> {
     };
 
     let touched = {
-        let mut consts = cx.app_data().consts.lock().unwrap();
+        let mut consts = cx.state().consts.lock().unwrap();
 
         for (k, v) in vars {
             let k = format!("FART_USER_CONST_{}", k);
@@ -208,14 +208,14 @@ async fn rerun(mut cx: tide::Context<AppData>) -> tide::http::Response<String> {
             vars.push_str(&format!("export {}={}\n", k, v));
         }
 
-        let vars_path = cx.app_data().project.join("user_consts.sh");
+        let vars_path = cx.state().project.join("user_consts.sh");
         let wrote_consts =
             fs::write(vars_path, vars.as_bytes()).map_err(|e| failure::Error::from(e));
 
         wrote_consts.and_then(|_| {
             // Touch the `src` directory to get the watcher to rebuild. Kinda hacky but
             // it works!
-            let src = cx.app_data().project.join("src");
+            let src = cx.state().project.join("src");
             Command::new("touch")
                 .arg(src)
                 .run_result(&mut Output::Inherit)
@@ -242,7 +242,7 @@ async fn image(cx: tide::Context<AppData>) -> tide::http::Response<Vec<u8>> {
             .body(vec![])
             .unwrap();
     }
-    let path = cx.app_data().project.join("images").join(image);
+    let path = cx.state().project.join("images").join(image);
     serve_static_file(path).await
 }
 
