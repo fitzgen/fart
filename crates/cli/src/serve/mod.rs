@@ -5,6 +5,8 @@ use crate::{
 };
 use failure::ResultExt;
 use futures::channel::{mpsc, oneshot};
+use futures::compat::Future01CompatExt;
+use futures::future::{FutureExt, TryFutureExt};
 use std::collections::HashMap;
 use std::env;
 use std::ffi::OsStr;
@@ -120,7 +122,12 @@ impl SubCommand for Serve {
         app.at("/events").get(events);
         app.at("/rerun").post(rerun);
         app.at("/images/:image").get(image);
-        futures::executor::block_on(app.serve(format!("127.0.0.1:{}", self.port)))?;
+        // futures::executor::block_on(app.serve(format!("127.0.0.1:{}", self.port)))
+        //     .context("failed to run local server")?;
+        tokio::run(app.serve(format!("127.0.0.1:{}", self.port))
+                   .map_err(|_| ())
+            .boxed()
+            .compat());
 
         Ok(())
     }
