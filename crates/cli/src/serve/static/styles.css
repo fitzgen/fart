@@ -87,11 +87,12 @@ fieldset {
 }
 
 #logs {
+    flex: 1;
     border-top: 0.5px solid;
     padding: 2em;
-    max-height: 30vh;
     min-height: 5em;
     white-space: pre;
     font-family: monospace;
     width: calc(100% - 2 * 2em);
+    overflow: scroll;
 }
