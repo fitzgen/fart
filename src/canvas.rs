@@ -153,8 +153,8 @@ impl Canvas {
                     "{} {} {} {}",
                     self.view.min().x,
                     self.view.min().y,
-                    self.view.max().x,
-                    self.view.max().y
+                    self.view.width(),
+                    self.view.height(),
                 ),
             )
             .set("width", format!("{}{}", width, W::SUFFIX))
