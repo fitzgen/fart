@@ -108,8 +108,12 @@ pub fn generate<F>(f: F) -> !
 where
     F: FnOnce(&mut Config) -> Result<svg::Document>,
 {
+    let then = std::time::Instant::now();
     let code = match try_generate(f) {
-        Ok(()) => 0,
+        Ok(()) => {
+            eprintln!("Generated in {:?}", std::time::Instant::now().duration_since(then));
+            0
+        },
         Err(e) => {
             eprintln!("Error: {}", e);
             for c in e.iter_causes() {
