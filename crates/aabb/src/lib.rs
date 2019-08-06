@@ -122,6 +122,11 @@ where
             && other.max.y <= self.max.y
     }
 
+    /// Does `self` contain the point `p`?
+    pub fn contains_point(&self, p: euclid::TypedPoint2D<T, U>) -> bool {
+        p.x >= self.min.x && p.x <= self.max.x && p.y >= self.min.y && p.y <= self.max.y
+    }
+
     /// Does `self` intersect with `other`?
     pub fn intersects(&self, other: &Aabb<T, U>) -> bool {
         self.max.x > other.min.x
