@@ -110,9 +110,12 @@ where
     let then = std::time::Instant::now();
     let code = match try_generate(f) {
         Ok(()) => {
-            eprintln!("Generated in {:?}", std::time::Instant::now().duration_since(then));
+            eprintln!(
+                "Generated in {:?}",
+                std::time::Instant::now().duration_since(then)
+            );
             0
-        },
+        }
         Err(e) => {
             eprintln!("Error: {}", e);
             for c in e.iter_causes() {
