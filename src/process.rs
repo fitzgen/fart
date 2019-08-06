@@ -1,9 +1,9 @@
-//! Incrementally computed systems for drawing onto a canvas.
+//! Incrementally computed processs for drawing onto a canvas.
 
 use crate::canvas::Canvas;
 use crate::Config;
 
-/// A system is something that is incrementally computed and drawn.
+/// A process is something that is incrementally computed and drawn.
 ///
 /// The `update` method mutates `self` and changes it slightly. Then `draw` is
 /// called. Then the process repeats. This continues until `true` is returned by
@@ -14,7 +14,7 @@ use crate::Config;
 ///
 /// ## Example
 ///
-/// This example implements a system that does stochastic rectangle packing.
+/// This example implements a process that does stochastic rectangle packing.
 ///
 /// ```
 /// use fart::{aabb::AabbTree, prelude::*};
@@ -25,7 +25,7 @@ use crate::Config;
 ///     rects: AabbTree<i64, CanvasSpace, ()>,
 /// }
 ///
-/// impl System for RectanglePacking {
+/// impl Process for RectanglePacking {
 ///     fn new(_: &mut fart::Config, _: &Canvas) -> Self {
 ///         Default::default()
 ///     }
@@ -69,36 +69,36 @@ use crate::Config;
 ///     }
 /// }
 /// ```
-pub trait System {
-    /// Create a new instance of the system.
+pub trait Process {
+    /// Create a new instance of the process.
     fn new(cfg: &mut Config, canvas: &Canvas) -> Self;
 
-    /// Update the system's state.
+    /// Update the process's state.
     ///
-    /// If the system is complete, return `true`. Then there will be a final
+    /// If the process is complete, return `true`. Then there will be a final
     /// `draw` call, and `update` will never be called again.
     ///
-    /// If the system is not finished, return `false` and `update` will be
+    /// If the process is not finished, return `false` and `update` will be
     /// called again in the future.
     fn update(&mut self, cfg: &mut Config, canvas: &Canvas) -> bool;
 
-    /// Draw the current state of the system to the given canvas.
+    /// Draw the current state of the process to the given canvas.
     ///
     /// If `last_frame` is true, then this is the last time that `draw` will be
     /// called.
     fn draw(&self, cfg: &mut Config, canvas: &mut Canvas, last_frame: bool);
 }
 
-/// Run a system to completion, drawing it to the given canvas.
-pub fn run<S>(cfg: &mut Config, canvas: &mut Canvas)
+/// Run a process to completion, drawing it to the given canvas.
+pub fn run<P>(cfg: &mut Config, canvas: &mut Canvas)
 where
-    S: System,
+    P: Process,
 {
-    let mut system = S::new(cfg, &canvas);
+    let mut process = P::new(cfg, &canvas);
 
     loop {
-        let last_frame = system.update(cfg, canvas);
-        system.draw(cfg, canvas, last_frame);
+        let last_frame = process.update(cfg, canvas);
+        process.draw(cfg, canvas, last_frame);
         if last_frame {
             break;
         }

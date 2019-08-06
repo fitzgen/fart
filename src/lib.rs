@@ -35,7 +35,7 @@
 pub mod canvas;
 pub mod path;
 pub mod prelude;
-pub mod system;
+pub mod process;
 
 mod user_const;
 
@@ -54,7 +54,6 @@ use failure::ResultExt;
 use rand::SeedableRng;
 use std::env;
 use std::path::PathBuf;
-use std::process;
 use std::str;
 
 /// Either an `Ok(T)` or an `Err(failure::Error)`.
@@ -122,7 +121,7 @@ where
             1
         }
     };
-    process::exit(code);
+    std::process::exit(code);
 }
 
 fn try_generate<F>(f: F) -> Result<()>
