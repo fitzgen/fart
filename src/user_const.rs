@@ -14,15 +14,17 @@ macro_rules! user_const {
             const $name:ident : $ty:ty = $default:expr ;
         )*
     ) => {
-        fart::prelude::lazy_static! { $(
+        $crate::prelude::lazy_static! { $(
             static ref $name: $ty = {
                 use std::{env, fmt::Debug, str::FromStr};
 
+                #[allow(non_snake_case)]
                 fn types_used_with_user_const_must_impl_FromStr<T: FromStr>() {}
                 types_used_with_user_const_must_impl_FromStr::<$ty>();
 
+                #[allow(non_snake_case)]
                 fn types_used_with_user_const_must_impl_Debug<T: Debug>() {}
-                types_used_with_user_const_must_impl_FromStr::<$ty>();
+                types_used_with_user_const_must_impl_Debug::<$ty>();
 
                 let env_var_name = concat!("FART_USER_CONST_", stringify!($name));
                 let value = match env::var(env_var_name) {

@@ -37,6 +37,7 @@ pub mod path;
 pub mod prelude;
 pub mod process;
 
+mod thread_rng;
 mod user_const;
 
 // Re-exports of our public dependencies.
@@ -49,6 +50,8 @@ pub use noise;
 pub use num_traits;
 pub use rand;
 pub use svg;
+
+pub use thread_rng::FartThreadRng;
 
 use failure::ResultExt;
 use rand::SeedableRng;
@@ -135,4 +138,9 @@ where
     let doc = f(&mut config).context("function supplied to `fart::generate` failed")?;
     svg::save(&config.file_name, &doc).context("failed to save SVG to a file")?;
     Ok(())
+}
+
+/// Get this thread's `FartThreadRng`!
+pub fn rng() -> FartThreadRng {
+    return FartThreadRng::default();
 }
