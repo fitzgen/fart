@@ -122,14 +122,15 @@ use fart::prelude::*;
 
 A canvas is a collection of drawn paths, which can be rendered into an SVG.
 
-#### `fart::shape`
-
-A shape is something with geometry that can be rendered into a series of paths.
-
 #### `fart::path`
 
 Paths that get drawn in the SVG. Paths are made up of a series of line commands,
 and have a an associated color.
+
+#### `fart::process`
+
+Helpers for making images from processing-style,
+update->draw->update->draw->... loops.
 
 #### `fart::aabb`
 
