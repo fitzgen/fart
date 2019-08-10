@@ -2,7 +2,7 @@ use crate::area2;
 use euclid::{point2, Point2D};
 use fart_aabb::{Aabb, ToAabb};
 use fart_utils::NoMorePartial;
-use num_traits::Num;
+use num_traits::{Num, NumCast};
 use partial_min_max::{max, min};
 use std::cmp::Ordering;
 
@@ -264,6 +264,30 @@ where
             || self.is_on(other.b)
             || other.is_on(self.a)
             || other.is_on(self.b)
+    }
+}
+
+impl<T, U> Line<T, U>
+where
+    T: Copy + NumCast,
+{
+    /// Cast from number representation `T` to number representation `V`.
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use fart_2d_geom::{line, Line};
+    ///
+    /// let l: Line<i64, UnknownUnit> = line(point2(1, 2), point2(3, 4));
+    ///
+    /// let m = l.cast::<f64>();
+    /// assert_eq!(m, line(point2(1.0, 2.0), point2(3.0, 4.0)));
+    /// ```
+    #[inline]
+    pub fn cast<V>(&self) -> Line<V, U>
+    where
+        V: NumCast + Copy,
+    {
+        line(self.a.cast(), self.b.cast())
     }
 }
 

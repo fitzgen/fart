@@ -2,7 +2,7 @@ use crate::{line, sort_around, Polygon};
 use euclid::{point2, Point2D};
 use fart_aabb::{Aabb, ToAabb};
 use fart_utils::NoMorePartial;
-use num_traits::{Bounded, Num, NumAssign, Signed};
+use num_traits::{Bounded, Num, NumAssign, NumCast, Signed};
 use std::fmt;
 use std::ops::Deref;
 
@@ -193,6 +193,36 @@ where
     /// ```
     pub fn improperly_contains_point(&self, point: Point2D<T, U>) -> bool {
         self.edges().all(|e| e.is_left_or_collinear(point))
+    }
+}
+
+impl<T, U> ConvexPolygon<T, U>
+where
+    T: Copy + NumCast,
+{
+    /// Cast from number representation `T` to number representation `V`.
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use fart_2d_geom::ConvexPolygon;
+    ///
+    /// let hull_f64 = ConvexPolygon::<f64, UnknownUnit>::hull(vec![
+    ///     point2(0.0, 0.0),
+    ///     point2(2.0, -1.0),
+    ///     point2(1.0, 1.0),
+    /// ]).expect("non-collinear vertices have a convex hull");
+    ///
+    /// let hull_i64 = hull_f64.cast::<i64>();
+    /// # let _ = hull_i64;
+    /// ```
+    #[inline]
+    pub fn cast<V>(&self) -> ConvexPolygon<V, U>
+    where
+        V: NumCast + Copy,
+    {
+        ConvexPolygon {
+            inner: self.inner.cast(),
+        }
     }
 }
 

@@ -474,6 +474,35 @@ where
 
 impl<T, U> Polygon<T, U>
 where
+    T: Copy + NumCast,
+{
+    /// Cast from number representation `T` to number representation `V`.
+    ///
+    /// ```
+    /// use euclid::{point2, UnknownUnit};
+    /// use fart_2d_geom::Polygon;
+    ///
+    /// let tri_f64 = Polygon::<f64, UnknownUnit>::new(vec![
+    ///     point2(0.0, 0.0),
+    ///     point2(2.0, -1.0),
+    ///     point2(1.0, 1.0),
+    /// ]);
+    ///
+    /// let tri_i64 = tri_f64.cast::<i64>();
+    /// # let _ = tri_i64;
+    /// ```
+    pub fn cast<V>(&self) -> Polygon<V, U>
+    where
+        V: NumCast + Copy,
+    {
+        Polygon {
+            vertices: self.vertices.iter().map(|p| p.cast()).collect(),
+        }
+    }
+}
+
+impl<T, U> Polygon<T, U>
+where
     T: Copy + Num + PartialOrd + euclid::Trig,
 {
     /// Transform this polygon with the given linear transformation and return
