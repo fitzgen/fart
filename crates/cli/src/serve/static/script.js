@@ -83,7 +83,7 @@ class UserConst {
     this.ty = ty;
     this.value = value;
     this.used = true;
-    this.label.textContent = `const ${name}: ${ty} =`;
+    this.label.textContent = `${name}: ${ty} =`;
     this.input.setAttribute("name", name);
     this.input.setAttribute("placeholder", value);
   }
@@ -128,7 +128,7 @@ class UserConstSet {
 }
 
 const logs = document.getElementById("logs");
-const latest = document.getElementById("latest");
+const latest = document.querySelector("#latest > object");
 const events = new EventSource("/events");
 const userConsts = new UserConstSet(userConstsForm);
 
