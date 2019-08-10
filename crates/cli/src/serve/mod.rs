@@ -5,7 +5,6 @@ use crate::{
 };
 use failure::ResultExt;
 use futures::channel::{mpsc, oneshot};
-use futures::compat::Future01CompatExt;
 use futures::future::{FutureExt, TryFutureExt};
 use std::collections::HashMap;
 use std::env;
