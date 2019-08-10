@@ -472,6 +472,62 @@ where
     }
 }
 
+impl<T, U> Polygon<T, U>
+where
+    T: Copy + Num + PartialOrd + euclid::Trig,
+{
+    /// Transform this polygon with the given linear transformation and return
+    /// the new, transformed polygon.
+    ///
+    /// ```
+    /// use euclid::{point2, Angle, Transform2D, UnknownUnit};
+    /// use fart_2d_geom::Polygon;
+    ///
+    /// let tri = Polygon::<f64, UnknownUnit>::new(vec![
+    ///     point2(0.0, 0.0),
+    ///     point2(2.0, -1.0),
+    ///     point2(1.0, 1.0),
+    /// ]);
+    ///
+    /// let rotation = Transform2D::<_, _, UnknownUnit>::create_rotation(Angle::degrees(60.0));
+    ///
+    /// let rotated_tri = tri.transform(&rotation);
+    /// # let _ = rotated_tri;
+    /// ```
+    pub fn transform<V>(&self, transformation: &euclid::Transform2D<T, U, V>) -> Polygon<T, V> {
+        Polygon {
+            vertices: self
+                .vertices
+                .iter()
+                .cloned()
+                .map(|p| transformation.transform_point(p))
+                .collect(),
+        }
+    }
+
+    /// Transform this polygon in place with the given linear transformation.
+    ///
+    /// ```
+    /// use euclid::{point2, Angle, Transform2D, UnknownUnit};
+    /// use fart_2d_geom::Polygon;
+    ///
+    /// let mut tri = Polygon::<_, UnknownUnit>::new(vec![
+    ///     point2(0.0, 0.0),
+    ///     point2(2.0, -1.0),
+    ///     point2(1.0, 1.0),
+    /// ]);
+    ///
+    /// let rotation = Transform2D::create_rotation(Angle::degrees(60.0));
+    ///
+    /// tri.transform_in_place(&rotation);
+    /// ```
+    pub fn transform_in_place(&mut self, transformation: &euclid::Transform2D<T, U, U>) {
+        for p in &mut self.vertices {
+            *p = transformation.transform_point(*p);
+        }
+    }
+}
+
 impl<T, U> ToAabb<T, U> for Polygon<T, U>
 where
     T: Copy + Num + PartialOrd,

@@ -267,6 +267,51 @@ where
     }
 }
 
+impl<T, U> Line<T, U>
+where
+    T: Copy + Num + PartialOrd + euclid::Trig,
+{
+    /// Transform this line with the given linear transformation and return the
+    /// new, transformed line.
+    ///
+    /// ```
+    /// use euclid::{point2, Transform2D, UnknownUnit};
+    /// use fart_2d_geom::{line, Line};
+    ///
+    /// let l: Line<_, UnknownUnit> = line(point2(3.0, 4.0), point2(0.0, 1.0));
+    ///
+    /// let scale = Transform2D::<_, _, UnknownUnit>::create_scale(0.5, 2.0);
+    ///
+    /// let m = l.transform(&scale);
+    ///
+    /// assert_eq!(m, line(point2(1.5, 8.0), point2(0.0, 2.0)));
+    /// ```
+    pub fn transform<V>(&self, transformation: &euclid::Transform2D<T, U, V>) -> Line<T, V> {
+        let a = transformation.transform_point(self.a);
+        let b = transformation.transform_point(self.b);
+        line(a, b)
+    }
+
+    /// Transform this line in place with the given linear transformation.
+    ///
+    /// ```
+    /// use euclid::{point2, Transform2D, UnknownUnit};
+    /// use fart_2d_geom::{line, Line};
+    ///
+    /// let mut l: Line<_, UnknownUnit> = line(point2(3.0, 4.0), point2(0.0, 1.0));
+    ///
+    /// let scale = Transform2D::<_, _, UnknownUnit>::create_scale(0.5, 2.0);
+    ///
+    /// l.transform_in_place(&scale);
+    ///
+    /// assert_eq!(l, line(point2(1.5, 8.0), point2(0.0, 2.0)));
+    /// ```
+    pub fn transform_in_place(&mut self, transformation: &euclid::Transform2D<T, U, U>) {
+        self.a = transformation.transform_point(self.a);
+        self.b = transformation.transform_point(self.b);
+    }
+}
+
 impl<U> Line<f64, U> {
     /// Get the intersection between two line segments.
     ///

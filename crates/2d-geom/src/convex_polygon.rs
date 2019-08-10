@@ -4,7 +4,7 @@ use fart_aabb::{Aabb, ToAabb};
 use fart_utils::NoMorePartial;
 use num_traits::{Bounded, Num, NumAssign, Signed};
 use std::fmt;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 
 /// A convex polygon.
 ///
@@ -40,11 +40,8 @@ impl<T, U> Deref for ConvexPolygon<T, U> {
     }
 }
 
-impl<T, U> DerefMut for ConvexPolygon<T, U> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
-}
+// NB: No `DerefMut` implementation because mutating the inner polygon might
+// remove the convexity.
 
 impl<T, U> From<ConvexPolygon<T, U>> for Polygon<T, U> {
     #[inline]
@@ -196,6 +193,59 @@ where
     /// ```
     pub fn improperly_contains_point(&self, point: Point2D<T, U>) -> bool {
         self.edges().all(|e| e.is_left_or_collinear(point))
+    }
+}
+
+impl<T, U> ConvexPolygon<T, U>
+where
+    T: Copy + Num + PartialOrd + euclid::Trig,
+{
+    /// Transform this convex polygon with the given linear transformation and
+    /// return the new, transformed convex polygon.
+    ///
+    /// ```
+    /// use euclid::{point2, Angle, Transform2D, UnknownUnit};
+    /// use fart_2d_geom::ConvexPolygon;
+    ///
+    /// let hull = ConvexPolygon::<f64, UnknownUnit>::hull(vec![
+    ///     point2(0.0, 0.0),
+    ///     point2(1.0, 1.0),
+    ///     point2(2.0, -1.0),
+    /// ]).expect("should have a convex hull for non-collinear vertex sets");
+    ///
+    /// let rotation = Transform2D::<_, _, UnknownUnit>::create_rotation(Angle::degrees(60.0));
+    ///
+    /// let rotated_hull = hull.transform(&rotation);
+    /// # let _ = rotated_hull;
+    /// ```
+    pub fn transform<V>(
+        &self,
+        transformation: &euclid::Transform2D<T, U, V>,
+    ) -> ConvexPolygon<T, V> {
+        ConvexPolygon {
+            inner: self.inner.transform(transformation),
+        }
+    }
+
+    /// Transform this convex polygon in place with the given linear
+    /// transformation.
+    ///
+    /// ```
+    /// use euclid::{point2, Angle, Transform2D, UnknownUnit};
+    /// use fart_2d_geom::ConvexPolygon;
+    ///
+    /// let mut hull = ConvexPolygon::<f64, UnknownUnit>::hull(vec![
+    ///     point2(0.0, 0.0),
+    ///     point2(1.0, 1.0),
+    ///     point2(2.0, -1.0),
+    /// ]).expect("should have a convex hull for non-collinear vertex sets");
+    ///
+    /// let rotation = Transform2D::create_rotation(Angle::degrees(60.0));
+    ///
+    /// hull.transform_in_place(&rotation);
+    /// ```
+    pub fn transform_in_place(&mut self, transformation: &euclid::Transform2D<T, U, U>) {
+        self.inner.transform_in_place(transformation);
     }
 }
 
