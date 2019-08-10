@@ -61,7 +61,7 @@ impl Canvas {
         let mut max_x = 0;
         let mut max_y = 0;
 
-        let mut process_point = |p: &euclid::TypedPoint2D<i64, CanvasSpace>| {
+        let mut process_point = |p: &euclid::Point2D<i64, CanvasSpace>| {
             min_x = std::cmp::min(min_x, p.x);
             min_y = std::cmp::min(min_y, p.y);
             max_x = std::cmp::max(max_x, p.x);

@@ -1,5 +1,5 @@
 use crate::{line, sort_around, Polygon};
-use euclid::{point2, TypedPoint2D};
+use euclid::{point2, Point2D};
 use fart_aabb::{Aabb, ToAabb};
 use fart_utils::NoMorePartial;
 use num_traits::{Bounded, Num, NumAssign, Signed};
@@ -98,7 +98,7 @@ where
     /// assert!(ConvexPolygon::<i32, UnknownUnit>::hull(vec![point2(0, 0), point2(1, 1)]).is_none());
     /// assert!(ConvexPolygon::<i32, UnknownUnit>::hull(vec![point2(0, 0), point2(1, 1), point2(2, 2)]).is_none());
     /// ```
-    pub fn hull(mut vertices: Vec<TypedPoint2D<T, U>>) -> Option<ConvexPolygon<T, U>> {
+    pub fn hull(mut vertices: Vec<Point2D<T, U>>) -> Option<ConvexPolygon<T, U>> {
         let max = vertices
             .iter()
             .cloned()
@@ -170,7 +170,7 @@ where
     /// // Points exactly on the edge are not considered contained.
     /// assert!(!p.contains_point(point2(0, 0)));
     /// ```
-    pub fn contains_point(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn contains_point(&self, point: Point2D<T, U>) -> bool {
         self.edges().all(|e| e.is_left(point))
     }
 
@@ -194,7 +194,7 @@ where
     /// // Points exactly on the edge are considered contained.
     /// assert!(p.improperly_contains_point(point2(0, 0)));
     /// ```
-    pub fn improperly_contains_point(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn improperly_contains_point(&self, point: Point2D<T, U>) -> bool {
         self.edges().all(|e| e.is_left_or_collinear(point))
     }
 }

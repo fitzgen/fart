@@ -1,4 +1,4 @@
-use euclid::{point2, TypedPoint2D};
+use euclid::{point2, Point2D};
 use fart_2d_geom::Polygon;
 use quickcheck::{quickcheck, Arbitrary, Gen};
 use rand::distributions::{Distribution, Uniform};
@@ -58,7 +58,7 @@ fn check_triangulation_uses_every_vertex(polygon: Polygon<i64, UnknownUnit>) -> 
         .vertices()
         .iter()
         .cloned()
-        .collect::<HashSet<TypedPoint2D<i64, UnknownUnit>>>();
+        .collect::<HashSet<Point2D<i64, UnknownUnit>>>();
 
     let mut yet_to_see = vertices.clone();
     let mut saw_unknown = false;

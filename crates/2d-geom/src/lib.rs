@@ -8,12 +8,12 @@ mod polygon;
 
 pub use crate::{convex_polygon::*, line::*, polygon::*};
 
-use euclid::{point2, TypedPoint2D};
+use euclid::{point2, Point2D};
 use num_traits::{Num, NumAssign, NumCast, Signed};
 use std::cmp::Ordering;
 
 #[inline]
-fn area2<T, U>(a: TypedPoint2D<T, U>, b: TypedPoint2D<T, U>, c: TypedPoint2D<T, U>) -> T
+fn area2<T, U>(a: Point2D<T, U>, b: Point2D<T, U>, c: Point2D<T, U>) -> T
 where
     T: Copy + Num,
 {
@@ -40,7 +40,7 @@ where
 ///
 /// assert_eq!(c, point2(1, 1));
 /// ```
-pub fn center<T, U>(points: &[TypedPoint2D<T, U>]) -> TypedPoint2D<T, U>
+pub fn center<T, U>(points: &[Point2D<T, U>]) -> Point2D<T, U>
 where
     T: Copy + NumAssign + NumCast,
 {
@@ -73,10 +73,10 @@ where
 /// # Example
 ///
 /// ```
-/// use euclid::{point2, TypedPoint2D, UnknownUnit};
+/// use euclid::{point2, Point2D, UnknownUnit};
 /// use fart_2d_geom::{center, sort_around};
 ///
-/// let mut points: Vec<TypedPoint2D<i32, UnknownUnit>> = vec![
+/// let mut points: Vec<Point2D<i32, UnknownUnit>> = vec![
 ///     point2(0, 2), point2(2, 2),
 ///     point2(0, 0), point2(2, 0),
 /// ];
@@ -91,7 +91,7 @@ where
 ///     point2(2, 2),
 /// ]);
 /// ```
-pub fn sort_around<T, U>(pivot: TypedPoint2D<T, U>, points: &mut [TypedPoint2D<T, U>])
+pub fn sort_around<T, U>(pivot: Point2D<T, U>, points: &mut [Point2D<T, U>])
 where
     T: Copy + NumAssign + PartialOrd + Signed,
 {
@@ -150,7 +150,7 @@ where
 ///     point2(0, 1),
 /// ]));
 /// ```
-pub fn is_counter_clockwise<T, U>(vertices: &[TypedPoint2D<T, U>]) -> bool
+pub fn is_counter_clockwise<T, U>(vertices: &[Point2D<T, U>]) -> bool
 where
     T: Copy + NumAssign + Signed + PartialOrd,
 {

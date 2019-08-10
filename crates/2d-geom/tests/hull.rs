@@ -1,4 +1,4 @@
-use euclid::{point2, TypedPoint2D, UnknownUnit};
+use euclid::{point2, Point2D, UnknownUnit};
 use fart_2d_geom::ConvexPolygon;
 use quickcheck::quickcheck;
 
@@ -6,7 +6,7 @@ fn check_all_vertices_within_convex_hull(vertices: Vec<(i64, i64)>) -> bool {
     let vertices = vertices
         .into_iter()
         .map(|(a, b)| point2(a, b))
-        .collect::<Vec<TypedPoint2D<i64, UnknownUnit>>>();
+        .collect::<Vec<Point2D<i64, UnknownUnit>>>();
 
     let p = match ConvexPolygon::hull(vertices.clone()) {
         None => return true,

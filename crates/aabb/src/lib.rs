@@ -4,7 +4,7 @@
 //! candidates for collision are quickly found using an AABB tree, can determine
 //! if they precisely collide with a more expensive algorithm.
 
-use euclid::TypedPoint2D;
+use euclid::Point2D;
 use num_traits::Num;
 use partial_min_max::{max as partial_max, min as partial_min};
 use std::fmt;
@@ -15,8 +15,8 @@ use std::fmt;
 /// * `U` is the unit. `ScreenSpace` or `WorldSpace` etc.
 #[derive(Clone, PartialEq)]
 pub struct Aabb<T, U = euclid::UnknownUnit> {
-    min: TypedPoint2D<T, U>,
-    max: TypedPoint2D<T, U>,
+    min: Point2D<T, U>,
+    max: Point2D<T, U>,
 }
 
 impl<T, U> fmt::Debug for Aabb<T, U>
@@ -39,7 +39,7 @@ where
     ///
     /// `min`'s `x` and `y` components must be less than or equal to `max`'s.
     #[inline]
-    pub fn new(min: TypedPoint2D<T, U>, max: TypedPoint2D<T, U>) -> Aabb<T, U> {
+    pub fn new(min: Point2D<T, U>, max: Point2D<T, U>) -> Aabb<T, U> {
         assert!(min.x <= max.x);
         assert!(min.y <= max.y);
         Aabb { min, max }
@@ -53,7 +53,7 @@ where
     /// Panics if `vertices` is empty.
     pub fn for_vertices<I>(vertices: I) -> Aabb<T, U>
     where
-        I: IntoIterator<Item = TypedPoint2D<T, U>>,
+        I: IntoIterator<Item = Point2D<T, U>>,
     {
         let mut vertices = vertices.into_iter();
         let first = vertices
@@ -72,13 +72,13 @@ where
 
     /// Get this AABB's min.
     #[inline]
-    pub fn min(&self) -> TypedPoint2D<T, U> {
+    pub fn min(&self) -> Point2D<T, U> {
         self.min
     }
 
     /// Get this AABB's max.
     #[inline]
-    pub fn max(&self) -> TypedPoint2D<T, U> {
+    pub fn max(&self) -> Point2D<T, U> {
         self.max
     }
 
@@ -103,11 +103,11 @@ where
     /// Return the least upper bound of `self` and `other`.
     #[inline]
     pub fn join(&self, other: &Aabb<T, U>) -> Aabb<T, U> {
-        let min = TypedPoint2D::new(
+        let min = Point2D::new(
             partial_min(self.min.x, other.min.x),
             partial_min(self.min.y, other.min.y),
         );
-        let max = TypedPoint2D::new(
+        let max = Point2D::new(
             partial_max(self.max.x, other.max.x),
             partial_max(self.max.y, other.max.y),
         );
@@ -123,7 +123,7 @@ where
     }
 
     /// Does `self` contain the point `p`?
-    pub fn contains_point(&self, p: euclid::TypedPoint2D<T, U>) -> bool {
+    pub fn contains_point(&self, p: euclid::Point2D<T, U>) -> bool {
         p.x >= self.min.x && p.x <= self.max.x && p.y >= self.min.y && p.y <= self.max.y
     }
 
@@ -189,7 +189,7 @@ where
     /// use euclid::Point2D;
     /// use fart_aabb::{AabbTree, Aabb};
     ///
-    /// let mut tree = AabbTree::new();
+    /// let mut tree = AabbTree::<f64, euclid::UnknownUnit, &str>::new();
     /// tree.insert(Aabb::new(Point2D::new(0.0, 0.0), Point2D::new(2.0, 2.0)), "Alice");
     /// tree.insert(Aabb::new(Point2D::new(2.0, 2.0), Point2D::new(4.0, 4.0)), "Bob");
     /// tree.insert(Aabb::new(Point2D::new(10.0, 10.0), Point2D::new(20.0, 20.0)), "Zed");

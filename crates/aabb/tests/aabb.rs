@@ -5,7 +5,7 @@ use quickcheck::{quickcheck, Arbitrary};
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct U;
 
-type P2<T> = euclid::TypedPoint2D<T, U>;
+type P2<T> = euclid::Point2D<T, U>;
 
 fn p2<T>(a: T, b: T) -> P2<T> {
     P2::new(a, b)

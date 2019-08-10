@@ -124,10 +124,12 @@ impl SubCommand for Serve {
         app.at("/images/:image").get(image);
         // futures::executor::block_on(app.serve(format!("127.0.0.1:{}", self.port)))
         //     .context("failed to run local server")?;
-        tokio::run(app.serve(format!("127.0.0.1:{}", self.port))
-                   .map_err(|_| ())
-            .boxed()
-            .compat());
+        tokio::run(
+            app.serve(format!("127.0.0.1:{}", self.port))
+                .map_err(|_| ())
+                .boxed()
+                .compat(),
+        );
 
         Ok(())
     }

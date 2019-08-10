@@ -1,5 +1,5 @@
 use crate::area2;
-use euclid::{point2, TypedPoint2D};
+use euclid::{point2, Point2D};
 use fart_aabb::{Aabb, ToAabb};
 use fart_utils::NoMorePartial;
 use num_traits::Num;
@@ -10,9 +10,9 @@ use std::cmp::Ordering;
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Line<T, U> {
     /// The first point.
-    pub a: TypedPoint2D<T, U>,
+    pub a: Point2D<T, U>,
     /// The second point.
-    pub b: TypedPoint2D<T, U>,
+    pub b: Point2D<T, U>,
 }
 
 /// The direction a point lies relative to a line. Returned by
@@ -31,7 +31,7 @@ pub enum RelativeDirection {
 
 /// Convenience function for creating lines.
 #[inline]
-pub fn line<T, U>(a: TypedPoint2D<T, U>, b: TypedPoint2D<T, U>) -> Line<T, U> {
+pub fn line<T, U>(a: Point2D<T, U>, b: Point2D<T, U>) -> Line<T, U> {
     Line { a, b }
 }
 
@@ -41,13 +41,13 @@ where
 {
     /// Create a new line between the given points.
     #[inline]
-    pub fn new(a: TypedPoint2D<T, U>, b: TypedPoint2D<T, U>) -> Line<T, U> {
+    pub fn new(a: Point2D<T, U>, b: Point2D<T, U>) -> Line<T, U> {
         line(a, b)
     }
 
     /// Get the direction of the point relative to this line.
     #[inline]
-    pub fn relative_direction_of(&self, point: TypedPoint2D<T, U>) -> RelativeDirection {
+    pub fn relative_direction_of(&self, point: Point2D<T, U>) -> RelativeDirection {
         let zero = NoMorePartial(T::zero());
         let det = NoMorePartial(area2(self.a, self.b, point));
         match det.cmp(&zero) {
@@ -73,7 +73,7 @@ where
     /// assert!(!l.is_left(point2(2, 2)));
     /// ```
     #[inline]
-    pub fn is_left(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn is_left(&self, point: Point2D<T, U>) -> bool {
         self.relative_direction_of(point) == RelativeDirection::Left
     }
 
@@ -91,7 +91,7 @@ where
     /// assert!(!l.is_left_or_collinear(point2(1, 0)));
     /// ```
     #[inline]
-    pub fn is_left_or_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn is_left_or_collinear(&self, point: Point2D<T, U>) -> bool {
         match self.relative_direction_of(point) {
             RelativeDirection::Left | RelativeDirection::Collinear => true,
             RelativeDirection::Right => false,
@@ -112,7 +112,7 @@ where
     /// assert!(!l.is_collinear(point2(1, 0)));
     /// ```
     #[inline]
-    pub fn is_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn is_collinear(&self, point: Point2D<T, U>) -> bool {
         self.relative_direction_of(point) == RelativeDirection::Collinear
     }
 
@@ -132,7 +132,7 @@ where
     /// assert!(!l.is_right(point2(2, 2)));
     /// ```
     #[inline]
-    pub fn is_right(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn is_right(&self, point: Point2D<T, U>) -> bool {
         self.relative_direction_of(point) == RelativeDirection::Right
     }
 
@@ -150,7 +150,7 @@ where
     /// assert!(!l.is_right_or_collinear(point2(0, 1)));
     /// ```
     #[inline]
-    pub fn is_right_or_collinear(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn is_right_or_collinear(&self, point: Point2D<T, U>) -> bool {
         match self.relative_direction_of(point) {
             RelativeDirection::Right | RelativeDirection::Collinear => true,
             RelativeDirection::Left => false,
@@ -178,7 +178,7 @@ where
     /// // Does not include collinear-but-not-between points.
     /// assert!(!l.is_on(point2(3, 3)));
     /// ```
-    pub fn is_on(&self, point: TypedPoint2D<T, U>) -> bool {
+    pub fn is_on(&self, point: Point2D<T, U>) -> bool {
         if !self.is_collinear(point) {
             return false;
         }
@@ -387,7 +387,7 @@ impl<U> Line<f64, U> {
     }
 
     fn parallel_intersection(&self, other: &Line<f64, U>) -> LineIntersection<U> {
-        let between = |l: &Self, p: euclid::TypedPoint2D<f64, U>| {
+        let between = |l: &Self, p: euclid::Point2D<f64, U>| {
             if l.a.x != l.b.x {
                 (l.a.x <= p.x && p.x <= l.b.x) || (l.b.x <= p.x && p.x <= l.a.x)
             } else {
@@ -420,15 +420,15 @@ pub enum LineIntersection<U> {
 
     /// The line segments properly intersect at the given point, and are not
     /// collinear.
-    Proper(euclid::TypedPoint2D<f64, U>),
+    Proper(euclid::Point2D<f64, U>),
 
     /// The line segments improperly intersect and are not collinear, with the
     /// endpoint of one line segment landing on the other.
-    Improper(euclid::TypedPoint2D<f64, U>),
+    Improper(euclid::Point2D<f64, U>),
 
     /// The lines are collinear and intersect at the given point (and perhaps
     /// infinitely many other points as well).
-    Collinear(euclid::TypedPoint2D<f64, U>),
+    Collinear(euclid::Point2D<f64, U>),
 }
 
 impl<U> LineIntersection<U> {
@@ -471,7 +471,7 @@ impl<U> LineIntersection<U> {
     /// Get the intersection point, if any, regardless if this is a proper,
     /// improper, or collinear intersection.
     #[inline]
-    pub fn point(&self) -> Option<euclid::TypedPoint2D<f64, U>> {
+    pub fn point(&self) -> Option<euclid::Point2D<f64, U>> {
         match *self {
             LineIntersection::None => None,
             LineIntersection::Proper(p)

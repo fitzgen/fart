@@ -1,5 +1,5 @@
 use crate::{area2, is_counter_clockwise, line, Line};
-use euclid::{point2, TypedPoint2D};
+use euclid::{point2, Point2D};
 use fart_aabb::{Aabb, ToAabb};
 use fart_utils::NoMorePartial;
 use num_traits::{Num, NumAssign, NumCast, Signed};
@@ -17,7 +17,7 @@ use std::fmt;
 /// * `U` is the unit. `ScreenSpace` or `WorldSpace` etc.
 #[derive(Clone)]
 pub struct Polygon<T, U> {
-    vertices: Vec<TypedPoint2D<T, U>>,
+    vertices: Vec<Point2D<T, U>>,
 }
 
 impl<T, U> fmt::Debug for Polygon<T, U>
@@ -43,7 +43,7 @@ where
     T: Copy + NumAssign + PartialOrd + Signed + fmt::Debug,
 {
     /// Construct a new polygon.
-    pub fn new(vertices: Vec<TypedPoint2D<T, U>>) -> Polygon<T, U> {
+    pub fn new(vertices: Vec<Point2D<T, U>>) -> Polygon<T, U> {
         assert!(vertices.len() >= 3);
         assert!(
             is_counter_clockwise(&vertices),
@@ -127,7 +127,7 @@ where
         return Polygon::new(vertices);
 
         fn any_edges_collide_with<T, U>(
-            vertices: &[TypedPoint2D<T, U>],
+            vertices: &[Point2D<T, U>],
             l: Line<T, U>,
             m: Line<T, U>,
         ) -> bool
@@ -151,12 +151,12 @@ where
     }
 
     /// Get this polygon's vertices.
-    pub fn vertices(&self) -> &[TypedPoint2D<T, U>] {
+    pub fn vertices(&self) -> &[Point2D<T, U>] {
         &self.vertices
     }
 
     /// Get the `i`<sup>th</sup> point in this polygon.
-    pub fn get(&self, i: usize) -> Option<TypedPoint2D<T, U>> {
+    pub fn get(&self, i: usize) -> Option<Point2D<T, U>> {
         self.vertices.get(i).cloned()
     }
 
@@ -364,7 +364,7 @@ where
     /// ```
     pub fn triangulate<F>(mut self, mut f: F)
     where
-        F: FnMut(TypedPoint2D<T, U>, TypedPoint2D<T, U>, TypedPoint2D<T, U>),
+        F: FnMut(Point2D<T, U>, Point2D<T, U>, Point2D<T, U>),
     {
         // First, process all collinear vertices, since they cause problems with
         // the earcutting algorithm below.

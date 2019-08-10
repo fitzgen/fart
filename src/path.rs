@@ -4,7 +4,7 @@
 //! are finally compiled to SVG.
 
 use crate::canvas::CanvasSpace;
-use euclid::{TypedPoint2D, TypedVector2D};
+use euclid::{Point2D, Vector2D};
 use num_traits::{Num, NumAssign, Signed};
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -45,14 +45,14 @@ where
 #[derive(Clone, Debug)]
 pub enum LineCommand<T, U> {
     /// Move the cursor to the given point.
-    MoveTo(TypedPoint2D<T, U>),
+    MoveTo(Point2D<T, U>),
     /// Move the cursor relative from its current position by the given vector.
-    MoveBy(TypedVector2D<T, U>),
+    MoveBy(Vector2D<T, U>),
 
     /// Draw a line to the given point.
-    LineTo(TypedPoint2D<T, U>),
+    LineTo(Point2D<T, U>),
     /// Draw a line relative from its current position by the given vector.
-    LineBy(TypedVector2D<T, U>),
+    LineBy(Vector2D<T, U>),
 
     /// Draw a horizontal line to the given x coordinate.
     HorizontalLineTo(T),
@@ -75,66 +75,66 @@ pub enum LineCommand<T, U> {
     CubicBezierTo {
         /// The first control point, describing the curve out from the starting
         /// position.
-        control_1: TypedPoint2D<T, U>,
+        control_1: Point2D<T, U>,
         /// The second control point, describing the curve into the ending
         /// position.
-        control_2: TypedPoint2D<T, U>,
+        control_2: Point2D<T, U>,
         /// The ending position.
-        end: TypedPoint2D<T, U>,
+        end: Point2D<T, U>,
     },
     /// Draw a cubic bezier curve from the current position with the give
     /// relative vectors.
     CubicBezierBy {
         /// The first control point, describing the curve out from the starting
         /// position.
-        control_1: TypedVector2D<T, U>,
+        control_1: Vector2D<T, U>,
         /// The second control point, describing the curve into the ending
         /// position.
-        control_2: TypedVector2D<T, U>,
+        control_2: Vector2D<T, U>,
         /// The ending position.
-        end: TypedVector2D<T, U>,
+        end: Vector2D<T, U>,
     },
 
     /// Draw a smooth cubic bezier curve from the current position with the
     /// given absolute points.
     SmoothCubicBezierTo {
         /// The control point describing the curve.
-        control: TypedPoint2D<T, U>,
+        control: Point2D<T, U>,
         /// The ending position.
-        end: TypedPoint2D<T, U>,
+        end: Point2D<T, U>,
     },
     /// Draw a smooth cubic bezier curve from the current position with the
     /// given relative vectors.
     SmoothCubicBezierBy {
         /// The control point describing the curve.
-        control: TypedVector2D<T, U>,
+        control: Vector2D<T, U>,
         /// The ending position.
-        end: TypedVector2D<T, U>,
+        end: Vector2D<T, U>,
     },
 
     /// Draw a quadratic bezier curve from the current position with the given
     /// absolute points.
     QuadraticBezierTo {
         /// The control point describing the curve.
-        control: TypedPoint2D<T, U>,
+        control: Point2D<T, U>,
         /// The ending position.
-        end: TypedPoint2D<T, U>,
+        end: Point2D<T, U>,
     },
     /// Draw a quadratic bezier curve from the current position with the given
     /// relative vectors.
     QuadraticBezierBy {
         /// The control point describing the curve.
-        control: TypedVector2D<T, U>,
+        control: Vector2D<T, U>,
         /// The ending position.
-        end: TypedVector2D<T, U>,
+        end: Vector2D<T, U>,
     },
 
     /// Draw a smooth quadratic bezier curve from the current position to the
     /// given absolute point.
-    SmoothQuadtraticCurveTo(TypedPoint2D<T, U>),
+    SmoothQuadtraticCurveTo(Point2D<T, U>),
     /// Draw a smooth quadratic bezier curve from the current position to the
     /// given relative vector.
-    SmoothQuadtraticCurveBy(TypedVector2D<T, U>),
+    SmoothQuadtraticCurveBy(Vector2D<T, U>),
 
     /// Draw an arc to the given absolute end point.
     ArcTo {
@@ -149,7 +149,7 @@ pub enum LineCommand<T, U> {
         /// Determines whether to begin moving at positive or negative angles.
         sweep_flag: bool,
         /// The ending position of the arc.
-        end: TypedPoint2D<T, U>,
+        end: Point2D<T, U>,
     },
     /// Draw an arc with the given relative end vector.
     ArcBy {
@@ -164,7 +164,7 @@ pub enum LineCommand<T, U> {
         /// Determines whether to begin moving at positive or negative angles.
         sweep_flag: bool,
         /// The ending position of the arc.
-        end: TypedVector2D<T, U>,
+        end: Vector2D<T, U>,
     },
 }
 
