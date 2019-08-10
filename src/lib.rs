@@ -54,10 +54,8 @@ pub use svg;
 pub use thread_rng::FartThreadRng;
 
 use failure::ResultExt;
-use rand::SeedableRng;
 use std::env;
 use std::path::PathBuf;
-use std::str;
 
 /// Either an `Ok(T)` or an `Err(failure::Error)`.
 pub type Result<T> = ::std::result::Result<T, failure::Error>;
@@ -66,7 +64,7 @@ pub type Result<T> = ::std::result::Result<T, failure::Error>;
 #[derive(Debug)]
 pub struct Config {
     file_name: PathBuf,
-    rng: rand::rngs::SmallRng,
+    rng: FartThreadRng,
 }
 
 impl Config {
@@ -75,22 +73,16 @@ impl Config {
             env::var("FART_FILE_NAME").context("missing required FART_FILE_NAME env var")?;
         let file_name = PathBuf::from(file_name);
 
-        let seed = if let Ok(seed) = env::var("FART_RNG_SEED") {
-            str::parse::<u64>(&seed)
-                .context("failed to parse the FART_RNG_SEED env var as a u64")?
-        } else {
-            rand::random()
-        };
-        let rng = rand::rngs::SmallRng::seed_from_u64(seed);
+        let rng = rng();
 
         Ok(Config { file_name, rng })
     }
 
-    /// Get a reference to the random number generator.
+    /// Get a random number generator.
     ///
-    /// All random code should use this rng so that if we seed it with the same
-    /// value, we ultimately get the same image.
+    /// Deprecated. Use `fart::rng()` instead.
     #[inline]
+    #[deprecated(note = "Use `fart::rng()` instead.")]
     pub fn rng(&mut self) -> &mut impl rand::Rng {
         &mut self.rng
     }
