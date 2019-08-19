@@ -26,13 +26,8 @@ svg = "0.5.12"
 members = ["crates/cli"]
 
 [patch.crates-io]
-# tide = { git = "https://github.com/rustasync/tide.git" }
+tide = { git = "https://github.com/rustasync/tide.git" }
 http-service = { git = "https://github.com/rustasync/http-service.git" }
-
-# Just for https://github.com/rustasync/tide/pull/301
-[patch.crates-io.tide]
-git = "https://github.com/ibaryshnikov/tide.git"
-rev = "0eb69efc0ef8e5684bbabfff6cccdaf82189688e"
 
 [patch.crates-io.route-recognizer]
 git = "https://github.com/miller-time/route-recognizer.rs"
