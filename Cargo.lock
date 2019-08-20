@@ -2065,16 +2065,6 @@ dependencies = [
  "winapi-build 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
-[[patch.unused]]
-name = "http-service"
-version = "0.2.0"
-source = "git+https://github.com/rustasync/http-service.git#736be519761f0446d025064cfce845c8e74e1149"
-
-[[patch.unused]]
-name = "route-recognizer"
-version = "0.1.12"
-source = "git+https://github.com/miller-time/route-recognizer.rs?rev=d7bc06d2dc58a2c59d8f2cfbee2ab23b8188700d#d7bc06d2dc58a2c59d8f2cfbee2ab23b8188700d"
-
 [metadata]
 "checksum adler32 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "7e522997b529f05601e05166c07ed17789691f562762c7f3b987263d2dedee5c"
 "checksum aho-corasick 0.7.6 (registry+https://github.com/rust-lang/crates.io-index)" = "58fb5e95d83b38284460a5fda7d6470aa0b8844d283a0b614b8535e880800d2d"

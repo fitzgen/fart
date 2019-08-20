@@ -27,8 +27,3 @@ members = ["crates/cli"]
 
 [patch.crates-io]
 tide = { git = "https://github.com/rustasync/tide.git" }
-http-service = { git = "https://github.com/rustasync/http-service.git" }
-
-[patch.crates-io.route-recognizer]
-git = "https://github.com/miller-time/route-recognizer.rs"
-rev = "d7bc06d2dc58a2c59d8f2cfbee2ab23b8188700d"
