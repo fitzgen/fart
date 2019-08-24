@@ -48,7 +48,7 @@ been evolving in its own direction since then.
 ## Install
 
 ```
-cargo install fart-cli
+cargo install fart
 ```
 
 ## Quick Start
