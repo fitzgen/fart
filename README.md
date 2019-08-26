@@ -39,11 +39,20 @@
 
 ## About
 
-`fart` is my personal tooling and framework for SVG-based generative
+`fart` is my *personal* tooling and framework for SVG-based generative
 art. Originally inspired by [Benjamin Kovach's excellent write up on
 infrastructure and tooling for generative
 art,](https://www.kovach.me/posts/2018-10-13-infrastructure-of-art.html) but has
 been evolving in its own direction since then.
+
+**I maintain `fart` just for myself.** If it happens to work out for you, okay!
+But this is not intended to be *the* framework for creating art with Rust that
+everyone, everywhere should use. If you file an issue, I might or might not
+respond, let alone fix it. If you submit a pull request, I might or might not
+respond, and I might or might not merge it.
+
+**If you want to make generative art with Rust, probably check out
+[`nannou`](https://nannou.cc/) rather than `fart`!**
 
 ## Install
 
