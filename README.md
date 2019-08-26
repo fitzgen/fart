@@ -103,10 +103,9 @@ commits time-stamped SVGs for you, so you can see the evolution of your project.
 
 Serve a project and its rendered SVGs on a local HTTP server. Automatically
 watches the project for changes and re-builds and re-runs it on each change,
-similar to `fart watch`.
-
-Eventually, will do hot reloading on the Web client, display logs, and have
-user-configurable parameters. Stay tuned!
+similar to `fart watch`. It provides a Web UI with a live-reloading preview,
+displays build and program logs, and has form widgets for interactively tweaking
+`fart::user_const!`s.
 
 ## Library
 
