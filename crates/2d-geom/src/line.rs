@@ -7,7 +7,7 @@ use partial_min_max::{max, min};
 use std::cmp::Ordering;
 
 /// A line between two points.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Line<T, U> {
     /// The first point.
     pub a: Point2D<T, U>,
