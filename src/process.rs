@@ -1,7 +1,6 @@
 //! Incrementally computed processs for drawing onto a canvas.
 
 use crate::canvas::Canvas;
-use crate::Config;
 
 /// A process is something that is incrementally computed and drawn.
 ///
@@ -30,20 +29,22 @@ use crate::Config;
 ///         Default::default()
 ///     }
 ///
-///     fn update(&mut self, cfg: &mut fart::Config, canvas: &Canvas) -> bool {
+///     fn update(&mut self, canvas: &Canvas) -> bool {
 ///         let mut i = 0;
 ///
 ///         let x_dist = Uniform::new(0, canvas.view().width());
 ///         let y_dist = Uniform::new(0, canvas.view().height());
 ///
+///         let mut rng = fart::rng();
+///
 ///         loop {
-///             let xa = x_dist.sample(cfg.rng());
-///             let xb = x_dist.sample(cfg.rng());
+///             let xa = x_dist.sample(&mut rng);
+///             let xb = x_dist.sample(&mut rng);
 ///             let xmin = min(xa, xb);
 ///             let xmax = max(xa, xb);
 ///
-///             let ya = y_dist.sample(cfg.rng());
-///             let yb = y_dist.sample(cfg.rng());
+///             let ya = y_dist.sample(&mut rng);
+///             let yb = y_dist.sample(&mut rng);
 ///             let ymin = min(ya, yb);
 ///             let ymax = max(ya, yb);
 ///
@@ -58,7 +59,7 @@ use crate::Config;
 ///         }
 ///     }
 ///
-///     fn draw(&self, _: &mut fart::Config, canvas: &mut Canvas, last_frame: bool) {
+///     fn draw(&self, canvas: &mut Canvas, last_frame: bool) {
 ///         if !last_frame {
 ///             return;
 ///         }
@@ -71,7 +72,7 @@ use crate::Config;
 /// ```
 pub trait Process {
     /// Create a new instance of the process.
-    fn new(cfg: &mut Config, canvas: &Canvas) -> Self;
+    fn new(canvas: &Canvas) -> Self;
 
     /// Update the process's state.
     ///
@@ -80,25 +81,25 @@ pub trait Process {
     ///
     /// If the process is not finished, return `false` and `update` will be
     /// called again in the future.
-    fn update(&mut self, cfg: &mut Config, canvas: &Canvas) -> bool;
+    fn update(&mut self, canvas: &Canvas) -> bool;
 
     /// Draw the current state of the process to the given canvas.
     ///
     /// If `last_frame` is true, then this is the last time that `draw` will be
     /// called.
-    fn draw(&self, cfg: &mut Config, canvas: &mut Canvas, last_frame: bool);
+    fn draw(&self, canvas: &mut Canvas, last_frame: bool);
 }
 
 /// Run a process to completion, drawing it to the given canvas.
-pub fn run<P>(cfg: &mut Config, canvas: &mut Canvas)
+pub fn run<P>(canvas: &mut Canvas)
 where
     P: Process,
 {
-    let mut process = P::new(cfg, &canvas);
+    let mut process = P::new(&canvas);
 
     loop {
-        let last_frame = process.update(cfg, canvas);
-        process.draw(cfg, canvas, last_frame);
+        let last_frame = process.update(canvas);
+        process.draw(canvas, last_frame);
         if last_frame {
             break;
         }
