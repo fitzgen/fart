@@ -325,7 +325,7 @@ dependencies = [
  "noise 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "svg 0.5.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "svg 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1566,7 +1566,7 @@ dependencies = [
 
 [[package]]
 name = "svg"
-version = "0.5.12"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -2263,7 +2263,7 @@ dependencies = [
 "checksum strsim 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 "checksum structopt 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "48399718b3ad695558b979b08a9056a5272ec573cd3070f5ca34165bd4a5bf35"
 "checksum structopt-derive 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2558075232402034384db060831349fb2d1303479593177cc84c25febbebbc6d"
-"checksum svg 0.5.12 (registry+https://github.com/rust-lang/crates.io-index)" = "a863ec1f8e7cfd4ea449f77445cca06aac240b9a677ccf12b0f65ef020db52c7"
+"checksum svg 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1f57a11872ea3f38eb99622ef7877fe207b3eeefbe877a49f08f9995d00f34a5"
 "checksum syn 0.15.44 (registry+https://github.com/rust-lang/crates.io-index)" = "9ca4b3b69a77cbe1ffc9e198781b7acb0c7365a883670e8f1c1bc66fba79a5c5"
 "checksum syn 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "158521e6f544e7e3dcfc370ac180794aa38cb34a1b1e07609376d4adcf429b93"
 "checksum synstructure 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)" = "02353edf96d6e4dc81aea2d8490a7e9db177bf8acb0e951c24940bf866cb313f"
