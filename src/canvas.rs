@@ -56,10 +56,10 @@ impl Canvas {
             return;
         }
 
-        let mut min_x = 0;
-        let mut min_y = 0;
-        let mut max_x = 0;
-        let mut max_y = 0;
+        let mut min_x = std::i64::MAX;
+        let mut min_y = std::i64::MAX;
+        let mut max_x = std::i64::MIN;
+        let mut max_y = std::i64::MIN;
 
         let mut process_point = |p: &euclid::Point2D<i64, CanvasSpace>| {
             min_x = std::cmp::min(min_x, p.x);
