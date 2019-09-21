@@ -25,10 +25,6 @@ use crate::canvas::Canvas;
 /// }
 ///
 /// impl Process for RectanglePacking {
-///     fn new(_: &mut fart::Config, _: &Canvas) -> Self {
-///         Default::default()
-///     }
-///
 ///     fn update(&mut self, canvas: &Canvas) -> bool {
 ///         let mut i = 0;
 ///
@@ -71,9 +67,6 @@ use crate::canvas::Canvas;
 /// }
 /// ```
 pub trait Process {
-    /// Create a new instance of the process.
-    fn new(canvas: &Canvas) -> Self;
-
     /// Update the process's state.
     ///
     /// If the process is complete, return `true`. Then there will be a final
@@ -91,12 +84,10 @@ pub trait Process {
 }
 
 /// Run a process to completion, drawing it to the given canvas.
-pub fn run<P>(canvas: &mut Canvas)
+pub fn run<P>(canvas: &mut Canvas, process: &mut P)
 where
     P: Process,
 {
-    let mut process = P::new(&canvas);
-
     loop {
         let last_frame = process.update(canvas);
         process.draw(canvas, last_frame);
