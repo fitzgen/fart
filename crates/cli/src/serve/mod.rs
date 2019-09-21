@@ -4,13 +4,11 @@ use crate::{
     command_ext::CommandExt, output::Output, sub_command::SubCommand, watcher::Watcher, Result,
 };
 use failure::ResultExt;
-use futures::channel::{mpsc, oneshot};
-use futures::future::{FutureExt, TryFutureExt};
+use futures::{channel::mpsc, FutureExt, TryFutureExt};
 use std::collections::HashMap;
 use std::env;
 use std::ffi::OsStr;
 use std::fs;
-use std::io;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::{Arc, Mutex};
@@ -105,7 +103,7 @@ impl SubCommand for Serve {
                 .unwrap();
         });
 
-        let mut app = tide::App::with_state(app_data);
+        let mut app = tide::Server::with_state(app_data);
         app.at("/").get(serve_from_memory(
             "text/html",
             include_str!("static/index.html"),
@@ -121,14 +119,12 @@ impl SubCommand for Serve {
         app.at("/events").get(events);
         app.at("/rerun").post(rerun);
         app.at("/images/:image").get(image);
-        // futures::executor::block_on(app.serve(format!("127.0.0.1:{}", self.port)))
-        //     .context("failed to run local server")?;
-        tokio::run(
-            app.serve(format!("127.0.0.1:{}", self.port))
+        async_std::task::block_on(
+            app.listen(format!("127.0.0.1:{}", self.port))
                 .map_err(|_| ())
-                .boxed()
-                .compat(),
-        );
+                .boxed(),
+        )
+        .map_err(|()| failure::format_err!("failed to listen on port {}", self.port))?;
 
         Ok(())
     }
@@ -152,47 +148,35 @@ fn serve_from_memory(
     }
 
     impl<T> tide::Endpoint<T> for ServeFromMemory {
-        type Fut = futures::future::Ready<tide::http::Response<http_service::Body>>;
+        type Fut = futures::future::Ready<tide::Response>;
 
-        fn call(&self, _cx: tide::Context<T>) -> Self::Fut {
+        fn call(&self, _cx: tide::Request<T>) -> Self::Fut {
             futures::future::ready(
-                tide::http::Response::builder()
-                    .header(
-                        tide::http::header::CONTENT_TYPE,
-                        format!("{}; charset=utf-8", self.content_type),
-                    )
-                    .status(tide::http::StatusCode::OK)
-                    .body(http_service::Body::from(self.body))
-                    .unwrap(),
+                tide::Response::new(200)
+                    .body_string(self.body.to_string())
+                    .set_header("Content-Type", self.content_type),
             )
         }
     }
 }
 
-async fn events(
-    cx: tide::Context<AppData>,
-) -> tide::EndpointResult<tide::http::Response<http_service::Body>> {
+async fn events(cx: tide::Request<AppData>) -> tide::Response {
     let events = events::EventStream::new(cx.state().subscribers.clone());
-    let body = http_service::Body::from_stream(events);
-    Ok(tide::http::Response::builder()
-        .header(tide::http::header::CONTENT_TYPE, "text/event-stream")
-        .header("X-Accel-Buffering", "no")
-        .header("Cache-Control", "no-cache")
-        .body(body)
-        .unwrap())
+    tide::Response::with_reader(200, events)
+        .set_header("Content-Type", "text/event-stream")
+        .set_header("X-Accel-Buffering", "no")
+        .set_header("Cache-Control", "no-cache")
 }
 
-async fn rerun(mut cx: tide::Context<AppData>) -> tide::http::Response<String> {
-    let mut response = tide::http::Response::builder();
-    response.header(tide::http::header::CONTENT_TYPE, "text/text; charset=utf-8");
+async fn rerun(mut cx: tide::Request<AppData>) -> tide::Response {
+    let response = tide::Response::new(200);
 
     let vars: HashMap<String, String> = match cx.body_json().await {
         Ok(vars) => vars,
         Err(e) => {
             return response
-                .status(tide::http::StatusCode::BAD_REQUEST)
-                .body(e.to_string().into())
-                .unwrap();
+                .set_status(tide::http::StatusCode::BAD_REQUEST)
+                .body_string(e.to_string())
         }
     };
 
@@ -231,54 +215,25 @@ async fn rerun(mut cx: tide::Context<AppData>) -> tide::http::Response<String> {
     };
 
     match touched {
-        Ok(_) => response
-            .status(tide::http::StatusCode::OK)
-            .body("".into())
-            .unwrap(),
+        Ok(_) => response.body_string("".to_string()),
         Err(e) => response
-            .status(tide::http::StatusCode::INTERNAL_SERVER_ERROR)
-            .body(e.to_string().into())
-            .unwrap(),
+            .body_string(e.to_string())
+            .set_status(tide::http::StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
 
-async fn image(cx: tide::Context<AppData>) -> tide::http::Response<Vec<u8>> {
+async fn image(cx: tide::Request<AppData>) -> tide::Response {
     let image = cx.param::<PathBuf>("image").unwrap();
     if image.extension() != Some(OsStr::new("svg")) {
-        return tide::http::Response::builder()
-            .status(tide::http::StatusCode::NOT_FOUND)
-            .body(vec![])
-            .unwrap();
+        return tide::Response::new(404);
     }
     let path = cx.state().project.join("images").join(image);
     serve_static_file(path).await
 }
 
-async fn serve_static_file(path: PathBuf) -> tide::http::Response<Vec<u8>> {
-    match read_file(path).await {
-        Ok(contents) => tide::http::Response::builder()
-            .status(tide::http::StatusCode::OK)
-            .body(contents)
-            .unwrap(),
-        Err(e) => tide::http::Response::builder()
-            .status(if e.kind() == io::ErrorKind::NotFound {
-                tide::http::StatusCode::NOT_FOUND
-            } else {
-                tide::http::StatusCode::INTERNAL_SERVER_ERROR
-            })
-            .body(e.to_string().into())
-            .unwrap(),
+async fn serve_static_file(path: PathBuf) -> tide::Response {
+    match async_std::fs::File::open(path).await {
+        Ok(file) => tide::Response::with_reader(200, async_std::io::BufReader::new(file)),
+        Err(e) => tide::Response::new(500).body_string(e.to_string()),
     }
-}
-
-async fn read_file(path: PathBuf) -> io::Result<Vec<u8>> {
-    // lol... Don't want to pull in all of tokio-fs and do futures 0.1 and 0.3
-    // compat shimming... So just spawn a thread. Eventually the async WG will
-    // hopefully provide a proper solution.
-    let (sender, receiver) = oneshot::channel();
-    let _ = thread::spawn(move || {
-        let _ = sender.send(fs::read(path));
-    });
-
-    receiver.await.unwrap()
 }
