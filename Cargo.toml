@@ -10,7 +10,7 @@ repository = "https://github.com/fitzgen/fart"
 version = "0.3.0"
 
 [dependencies]
-euclid = "0.20.1"
+euclid = "0.20.3"
 failure = "0.1.5"
 fart-2d-geom = { version = "=0.3.0", path = "crates/2d-geom" }
 fart-aabb = { version = "=0.3.0", path = "crates/aabb" }
