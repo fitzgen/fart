@@ -57,7 +57,7 @@ respond, and I might or might not merge it.
 ## Install
 
 ```
-cargo install fart-cli
+cargo install fart
 ```
 
 ## Quick Start
