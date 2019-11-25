@@ -19,7 +19,7 @@ id-arena = "2.2.1"
 lazy_static = "1.4.0"
 noise = "0.6.0"
 num-traits = "0.2.10"
-rand = "0.6.5"
+rand = "0.7.0"
 svg = "0.6.0"
 
 [workspace]
