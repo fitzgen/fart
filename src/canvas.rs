@@ -114,11 +114,22 @@ impl Canvas {
     }
 
     /// Add the given paths to the canvas.
-    pub fn draw<P>(&mut self, paths: &P)
+    pub fn draw<P>(&mut self, paths: P)
     where
         P: ToPaths<i64, CanvasSpace>,
     {
         self.paths.extend(paths.to_paths());
+    }
+
+    /// Given a collection of things that can be drawn, draw all of them.
+    pub fn draw_many<I, P>(&mut self, paths: I)
+    where
+        I: IntoIterator<Item = P>,
+        P: ToPaths<i64, CanvasSpace>,
+    {
+        for p in paths {
+            self.draw(p);
+        }
     }
 
     /// Render this canvas as an SVG with the given physical width and height.
