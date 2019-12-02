@@ -565,3 +565,17 @@ where
         Aabb::for_vertices(self.vertices.iter().cloned())
     }
 }
+
+impl<T, U> From<Aabb<T, U>> for Polygon<T, U>
+where
+    T: Copy + NumAssign + PartialOrd + Signed + fmt::Debug,
+{
+    fn from(aabb: Aabb<T, U>) -> Self {
+        Polygon::new(vec![
+            aabb.min(),
+            point2(aabb.max().x, aabb.min().y),
+            aabb.max(),
+            point2(aabb.min().x, aabb.max().y),
+        ])
+    }
+}

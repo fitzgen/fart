@@ -287,3 +287,14 @@ where
         self.inner.to_aabb()
     }
 }
+
+impl<T, U> From<Aabb<T, U>> for ConvexPolygon<T, U>
+where
+    T: Copy + NumAssign + PartialOrd + Signed + fmt::Debug,
+{
+    fn from(aabb: Aabb<T, U>) -> Self {
+        ConvexPolygon {
+            inner: Polygon::from(aabb),
+        }
+    }
+}
