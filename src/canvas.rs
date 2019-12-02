@@ -178,6 +178,14 @@ impl Canvas {
     }
 }
 
+impl ToPaths<i64, CanvasSpace> for Canvas {
+    type Paths = std::vec::IntoIter<Path<i64, CanvasSpace>>;
+
+    fn to_paths(&self) -> Self::Paths {
+        self.paths.clone().into_iter()
+    }
+}
+
 /// A physical unit supported by SVG (inches, centimeters, etc). Used when
 /// plotting an image.
 pub trait SvgUnit: Into<f64> {
