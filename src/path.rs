@@ -4,8 +4,8 @@
 //! are finally compiled to SVG.
 
 use crate::canvas::CanvasSpace;
-use euclid::{Point2D, Vector2D};
-use num_traits::{Num, NumAssign, Signed};
+use euclid::{point2, vec2, Point2D, Vector2D};
+use num_traits::{Num, NumAssign, NumCast, Signed};
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::iter;
@@ -168,6 +168,218 @@ pub enum LineCommand<T, U> {
     },
 }
 
+impl<T, U> LineCommand<T, U>
+where
+    T: Copy + Num + PartialOrd + euclid::Trig,
+{
+    /// Transform this line command with the given linear transformation and
+    /// return the new, transformed line command.
+    pub fn transform<V>(&self, transformation: &euclid::Transform2D<T, U, V>) -> LineCommand<T, V> {
+        match *self {
+            LineCommand::MoveTo(p) => LineCommand::MoveTo(transformation.transform_point(p)),
+            LineCommand::MoveBy(v) => LineCommand::MoveBy(transformation.transform_vector(v)),
+            LineCommand::LineTo(p) => LineCommand::LineTo(transformation.transform_point(p)),
+            LineCommand::LineBy(v) => LineCommand::LineBy(transformation.transform_vector(v)),
+            LineCommand::HorizontalLineTo(x) => LineCommand::HorizontalLineTo(
+                transformation.transform_point(point2(x, T::zero())).x,
+            ),
+            LineCommand::HorizontalLineBy(x) => {
+                LineCommand::HorizontalLineBy(transformation.transform_vector(vec2(x, T::zero())).x)
+            }
+            LineCommand::VerticalLineTo(y) => {
+                LineCommand::VerticalLineTo(transformation.transform_point(point2(T::zero(), y)).y)
+            }
+            LineCommand::VerticalLineBy(y) => {
+                LineCommand::VerticalLineBy(transformation.transform_vector(vec2(T::zero(), y)).y)
+            }
+            LineCommand::Close => LineCommand::Close,
+            LineCommand::CubicBezierTo {
+                control_1,
+                control_2,
+                end,
+            } => LineCommand::CubicBezierTo {
+                control_1: transformation.transform_point(control_1),
+                control_2: transformation.transform_point(control_2),
+                end: transformation.transform_point(end),
+            },
+            LineCommand::CubicBezierBy {
+                control_1,
+                control_2,
+                end,
+            } => LineCommand::CubicBezierBy {
+                control_1: transformation.transform_vector(control_1),
+                control_2: transformation.transform_vector(control_2),
+                end: transformation.transform_vector(end),
+            },
+            LineCommand::SmoothCubicBezierTo { control, end } => LineCommand::SmoothCubicBezierTo {
+                control: transformation.transform_point(control),
+                end: transformation.transform_point(end),
+            },
+            LineCommand::SmoothCubicBezierBy { control, end } => LineCommand::SmoothCubicBezierBy {
+                control: transformation.transform_vector(control),
+                end: transformation.transform_vector(end),
+            },
+            LineCommand::QuadraticBezierTo { control, end } => LineCommand::QuadraticBezierTo {
+                control: transformation.transform_point(control),
+                end: transformation.transform_point(end),
+            },
+            LineCommand::QuadraticBezierBy { control, end } => LineCommand::QuadraticBezierBy {
+                control: transformation.transform_vector(control),
+                end: transformation.transform_vector(end),
+            },
+            LineCommand::SmoothQuadtraticCurveTo(p) => {
+                LineCommand::SmoothQuadtraticCurveTo(transformation.transform_point(p))
+            }
+            LineCommand::SmoothQuadtraticCurveBy(v) => {
+                LineCommand::SmoothQuadtraticCurveBy(transformation.transform_vector(v))
+            }
+            LineCommand::ArcTo {
+                x_radius,
+                y_radius,
+                x_axis_rotation,
+                large_arc_flag,
+                sweep_flag,
+                end,
+            } => {
+                let radius = transformation.transform_point(point2(x_radius, y_radius));
+                LineCommand::ArcTo {
+                    x_radius: radius.x,
+                    y_radius: radius.y,
+                    x_axis_rotation,
+                    large_arc_flag,
+                    sweep_flag,
+                    end: transformation.transform_point(end),
+                }
+            }
+            LineCommand::ArcBy {
+                x_radius,
+                y_radius,
+                x_axis_rotation,
+                large_arc_flag,
+                sweep_flag,
+                end,
+            } => {
+                let radius = transformation.transform_vector(vec2(x_radius, y_radius));
+                LineCommand::ArcBy {
+                    x_radius: radius.x,
+                    y_radius: radius.y,
+                    x_axis_rotation,
+                    large_arc_flag,
+                    sweep_flag,
+                    end: transformation.transform_vector(end),
+                }
+            }
+        }
+    }
+
+    /// Transform this line command in place with the given linear transformation.
+    pub fn transform_in_place(&mut self, transformation: &euclid::Transform2D<T, U, U>) {
+        *self = self.transform(transformation);
+    }
+}
+
+impl<T, U> LineCommand<T, U>
+where
+    T: Copy + NumCast,
+{
+    /// Cast from number representation `T` to number representation `V`.
+    #[inline]
+    pub fn cast<V>(&self) -> LineCommand<V, U>
+    where
+        V: NumCast + Copy,
+    {
+        match *self {
+            LineCommand::MoveTo(p) => LineCommand::MoveTo(p.cast()),
+            LineCommand::MoveBy(v) => LineCommand::MoveBy(v.cast()),
+            LineCommand::LineTo(p) => LineCommand::LineTo(p.cast()),
+            LineCommand::LineBy(v) => LineCommand::LineBy(v.cast()),
+            LineCommand::HorizontalLineTo(x) => LineCommand::HorizontalLineTo(V::from(x).unwrap()),
+            LineCommand::HorizontalLineBy(x) => LineCommand::HorizontalLineBy(V::from(x).unwrap()),
+            LineCommand::VerticalLineTo(y) => LineCommand::VerticalLineTo(V::from(y).unwrap()),
+            LineCommand::VerticalLineBy(y) => LineCommand::VerticalLineBy(V::from(y).unwrap()),
+            LineCommand::Close => LineCommand::Close,
+            LineCommand::CubicBezierTo {
+                control_1,
+                control_2,
+                end,
+            } => LineCommand::CubicBezierTo {
+                control_1: control_1.cast(),
+                control_2: control_2.cast(),
+                end: end.cast(),
+            },
+            LineCommand::CubicBezierBy {
+                control_1,
+                control_2,
+                end,
+            } => LineCommand::CubicBezierBy {
+                control_1: control_1.cast(),
+                control_2: control_2.cast(),
+                end: end.cast(),
+            },
+            LineCommand::SmoothCubicBezierTo { control, end } => LineCommand::SmoothCubicBezierTo {
+                control: control.cast(),
+                end: end.cast(),
+            },
+            LineCommand::SmoothCubicBezierBy { control, end } => LineCommand::SmoothCubicBezierBy {
+                control: control.cast(),
+                end: end.cast(),
+            },
+            LineCommand::QuadraticBezierTo { control, end } => LineCommand::QuadraticBezierTo {
+                control: control.cast(),
+                end: end.cast(),
+            },
+            LineCommand::QuadraticBezierBy { control, end } => LineCommand::QuadraticBezierBy {
+                control: control.cast(),
+                end: end.cast(),
+            },
+            LineCommand::SmoothQuadtraticCurveTo(p) => {
+                LineCommand::SmoothQuadtraticCurveTo(p.cast())
+            }
+            LineCommand::SmoothQuadtraticCurveBy(v) => {
+                LineCommand::SmoothQuadtraticCurveBy(v.cast())
+            }
+            LineCommand::ArcTo {
+                x_radius,
+                y_radius,
+                x_axis_rotation,
+                large_arc_flag,
+                sweep_flag,
+                end,
+            } => {
+                let radius: Point2D<V, U> = point2::<T, U>(x_radius, y_radius).cast();
+                LineCommand::ArcTo {
+                    x_radius: radius.x,
+                    y_radius: radius.y,
+                    x_axis_rotation: euclid::Angle::radians(
+                        V::from(x_axis_rotation.get()).unwrap(),
+                    ),
+                    large_arc_flag,
+                    sweep_flag,
+                    end: end.cast(),
+                }
+            }
+            LineCommand::ArcBy {
+                x_radius,
+                y_radius,
+                x_axis_rotation,
+                large_arc_flag,
+                sweep_flag,
+                end,
+            } => {
+                let radius: Vector2D<V, U> = vec2::<T, U>(x_radius, y_radius).cast();
+                LineCommand::ArcBy {
+                    x_radius: radius.x,
+                    y_radius: radius.y,
+                    x_axis_rotation: V::from(x_axis_rotation).unwrap(),
+                    large_arc_flag,
+                    sweep_flag,
+                    end: end.cast(),
+                }
+            }
+        }
+    }
+}
+
 impl<T, U> Path<T, U> {
     /// Construct a new, empty path.
     pub fn new() -> Path<T, U> {
@@ -182,6 +394,48 @@ impl<T, U> Path<T, U> {
         Path {
             color: "black".into(),
             commands: commands.into_iter().collect(),
+        }
+    }
+}
+
+impl<T, U> Path<T, U>
+where
+    T: Copy + NumCast,
+{
+    /// Cast from number representation `T` to number representation `V`.
+    #[inline]
+    pub fn cast<V>(&self) -> Path<V, U>
+    where
+        V: NumCast + Copy,
+    {
+        Path {
+            color: self.color.clone(),
+            commands: self.commands.iter().map(|c| c.cast::<V>()).collect(),
+        }
+    }
+}
+
+impl<T, U> Path<T, U>
+where
+    T: Copy + Num + PartialOrd + euclid::Trig,
+{
+    /// Transform this path with the given linear transformation and return
+    /// the new, transformed path.
+    pub fn transform<V>(&self, transformation: &euclid::Transform2D<T, U, V>) -> Path<T, V> {
+        Path {
+            color: self.color.clone(),
+            commands: self
+                .commands
+                .iter()
+                .map(|c| c.transform(transformation))
+                .collect(),
+        }
+    }
+
+    /// Transform this path in place with the given linear transformation.
+    pub fn transform_in_place(&mut self, transformation: &euclid::Transform2D<T, U, U>) {
+        for c in &mut self.commands {
+            c.transform_in_place(transformation);
         }
     }
 }
@@ -244,6 +498,17 @@ pub trait ToPaths<T, U> {
     fn to_paths(&self) -> Self::Paths;
 }
 
+impl<'a, P, T, U> ToPaths<T, U> for &'a P
+where
+    P: ToPaths<T, U>,
+{
+    type Paths = <P as ToPaths<T, U>>::Paths;
+
+    fn to_paths(&self) -> Self::Paths {
+        (*self).to_paths()
+    }
+}
+
 impl<T, U> ToPaths<T, U> for fart_2d_geom::Polygon<T, U>
 where
     T: Copy + NumAssign + PartialOrd + Signed + Debug,
@@ -303,9 +568,9 @@ where
     fn to_paths(&self) -> Self::Paths {
         iter::once(Path::with_commands(vec![
             LineCommand::MoveTo(self.min()),
-            LineCommand::HorizontalLineBy(self.width()),
-            LineCommand::VerticalLineBy(self.height()),
-            LineCommand::HorizontalLineTo(self.min().x),
+            LineCommand::LineTo(point2(self.max().x, self.min().y)),
+            LineCommand::LineTo(self.max()),
+            LineCommand::LineTo(point2(self.min().x, self.max().y)),
             LineCommand::Close,
         ]))
     }
