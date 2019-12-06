@@ -290,7 +290,7 @@ dependencies = [
 
 [[package]]
 name = "euclid"
-version = "0.20.5"
+version = "0.20.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "num-traits 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -320,7 +320,7 @@ dependencies = [
 name = "fart"
 version = "0.3.0"
 dependencies = [
- "euclid 0.20.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "euclid 0.20.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "fart-2d-geom 0.3.0",
  "fart-aabb 0.3.0",
@@ -337,7 +337,7 @@ dependencies = [
 name = "fart-2d-geom"
 version = "0.3.0"
 dependencies = [
- "euclid 0.20.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "euclid 0.20.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "fart-aabb 0.3.0",
  "fart-utils 0.3.0",
  "num-traits 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -350,7 +350,7 @@ dependencies = [
 name = "fart-aabb"
 version = "0.3.0"
 dependencies = [
- "euclid 0.20.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "euclid 0.20.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "partial-min-max 0.3.0",
  "quickcheck 0.8.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2086,7 +2086,7 @@ dependencies = [
 "checksum env_logger 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "aafcde04e90a5226a6443b7aabdb016ba2f8307c847d524724bd9b346dd1a2d3"
 "checksum error-chain 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3ab49e9dcb602294bc42f9a7dfc9bc6e936fca4418ea300dbfb84fe16de0b7d9"
 "checksum escargot 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "74cf96bec282dcdb07099f7e31d9fed323bca9435a09aba7b6d99b7617bca96d"
-"checksum euclid 0.20.5 (registry+https://github.com/rust-lang/crates.io-index)" = "a8813df82772c5ef4c2e9cd4a986773c125ffeafdc08204c9d5c2f06e0abdc17"
+"checksum euclid 0.20.6 (registry+https://github.com/rust-lang/crates.io-index)" = "2ea1cb302e02466d06f864fd214767de416f1e074fb6257f5addff9e4f7df9bc"
 "checksum failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "f8273f13c977665c5db7eb2b99ae520952fe5ac831ae4cd09d80c4c7042b5ed9"
 "checksum failure_derive 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "0bc225b78e0391e4b8683440bf2e63c2deeeb2ce5189eab46e2b68c6d3725d08"
 "checksum filetime 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "2f8c63033fcba1f51ef744505b3cad42510432b904c062afa67ad7ece008429d"
