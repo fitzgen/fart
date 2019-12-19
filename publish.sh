@@ -9,7 +9,7 @@
 set -eux
 cd "$(dirname $0)"
 
-CRATES=$(echo "partial-min-max utils aabb 2d-geom" | tr ' ' '\n')
+CRATES=$(echo "partial-min-max utils aabb 2d-geom cli" | tr ' ' '\n')
 
 for x in $CRATES; do
     cd "./crates/$x"
