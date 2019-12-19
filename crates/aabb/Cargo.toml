@@ -7,12 +7,12 @@ license = "MIT/Apache-2.0"
 name = "fart-aabb"
 readme = "./README.md"
 repository = "https://github.com/fitzgen/fart/tree/master/crates/aabb"
-version = "0.3.0"
+version = "0.4.0"
 
 [dependencies]
 euclid = "0.20.1"
 num-traits = "0.2.6"
-partial-min-max = { version = "=0.3.0", path = "../partial-min-max" }
+partial-min-max = { version = "=0.4.0", path = "../partial-min-max" }
 
 [dev-dependencies]
 quickcheck = "0.8.3"

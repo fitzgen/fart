@@ -395,7 +395,7 @@ dependencies = [
 
 [[package]]
 name = "fart"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "euclid",
  "failure",
@@ -413,7 +413,7 @@ dependencies = [
 
 [[package]]
 name = "fart-2d-geom"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "euclid",
  "fart-aabb",
@@ -426,7 +426,7 @@ dependencies = [
 
 [[package]]
 name = "fart-aabb"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "euclid",
  "num-traits 0.2.10",
@@ -436,7 +436,7 @@ dependencies = [
 
 [[package]]
 name = "fart-cli"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "assert_cmd",
  "async-std",
@@ -457,7 +457,7 @@ dependencies = [
 
 [[package]]
 name = "fart-utils"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "num-traits 0.2.10",
 ]
@@ -1187,7 +1187,7 @@ dependencies = [
 
 [[package]]
 name = "partial-min-max"
-version = "0.3.0"
+version = "0.4.0"
 
 [[package]]
 name = "percent-encoding"

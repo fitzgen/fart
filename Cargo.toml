@@ -7,21 +7,21 @@ license = "MIT/Apache-2.0"
 name = "fart"
 readme = "./README.md"
 repository = "https://github.com/fitzgen/fart"
-version = "0.3.0"
+version = "0.4.0"
 
 [dependencies]
 euclid = "0.20.7"
 failure = "0.1.6"
-fart-2d-geom = { version = "=0.3.0", path = "crates/2d-geom" }
-fart-aabb = { version = "=0.3.0", path = "crates/aabb" }
-fart-utils = { version = "=0.3.0", path = "crates/utils" }
+fart-2d-geom = { version = "=0.4.0", path = "crates/2d-geom" }
+fart-aabb = { version = "=0.4.0", path = "crates/aabb" }
+fart-utils = { version = "=0.4.0", path = "crates/utils" }
 id-arena = "2.2.1"
 lazy_static = "1.4.0"
 noise = "0.6.0"
 num-traits = "0.2.10"
 rand = "0.6.5"
 svg = "0.6.0"
-partial-min-max = { path = "crates/partial-min-max", version = "0.3" }
+partial-min-max = { path = "crates/partial-min-max", version = "=0.4.0" }
 
 [workspace]
 members = ["crates/cli"]

@@ -6,7 +6,7 @@ license = "MIT/Apache-2.0"
 name = "fart-cli"
 readme = "../../README.md"
 repository = "https://github.com/fitzgen/fart"
-version = "0.3.0"
+version = "0.4.0"
 
 [[bin]]
 name = "fart"
