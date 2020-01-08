@@ -863,9 +863,9 @@ dependencies = [
 
 [[package]]
 name = "inotify"
-version = "0.6.1"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40b54539f3910d6f84fbf9a643efd6e3aa6e4f001426c0329576128255994718"
+checksum = "24e40d6fd5d64e2082e0c796495c8ef5ad667a96d03e5aaa0becfd9d47bcbfb8"
 dependencies = [
  "bitflags",
  "inotify-sys",
@@ -1077,16 +1077,15 @@ checksum = "2e0a1a39eab95caf4f5556da9289b9e68f0aafac901b2ce80daaf020d3b733a8"
 
 [[package]]
 name = "notify"
-version = "4.0.14"
+version = "4.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "199628fc33b21bc767baa057490b00b382ecbae030803a7b36292422d15b778b"
+checksum = "80ae4a7688d1fab81c5bf19c64fc8db920be8d519ce6336ed4e7efe024724dbd"
 dependencies = [
  "bitflags",
  "filetime",
  "fsevent",
  "fsevent-sys",
  "inotify",
- "kernel32-sys",
  "libc",
  "mio",
  "mio-extras",
