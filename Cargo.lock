@@ -89,6 +89,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d49d90015b3c36167a20fe2810c5cd875ad504b39cff3d4eae7977e6b7c1cb2"
 
 [[package]]
+name = "autocfg"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
+
+[[package]]
 name = "backtrace"
 version = "0.3.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -181,7 +187,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "31850b4a4d6bae316f7a09e691c944c28299298837edc0a03f755618c23cbc01"
 dependencies = [
  "num-integer",
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
  "time",
 ]
 
@@ -240,7 +246,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5064ebdbf05ce3cb95e45c8b086f72263f4166b29b97f6baff7ef7fe047b55ac"
 dependencies = [
- "autocfg",
+ "autocfg 0.1.7",
  "cfg-if",
  "crossbeam-utils 0.7.0",
  "lazy_static",
@@ -282,7 +288,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce446db02cdc3165b94ae73111e570793400d0794e46125cc4056c81cbb039f4"
 dependencies = [
- "autocfg",
+ "autocfg 0.1.7",
  "cfg-if",
  "lazy_static",
 ]
@@ -368,7 +374,7 @@ version = "0.20.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f852d320142e1cceb15dccef32ed72a9970b83109d8a4e24b1ab04d579f485d"
 dependencies = [
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
 ]
 
 [[package]]
@@ -405,7 +411,7 @@ dependencies = [
  "id-arena",
  "lazy_static",
  "noise",
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
  "partial-min-max",
  "rand 0.6.5",
  "svg",
@@ -418,7 +424,7 @@ dependencies = [
  "euclid",
  "fart-aabb",
  "fart-utils",
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
  "partial-min-max",
  "quickcheck 0.8.5",
  "rand 0.6.5",
@@ -429,7 +435,7 @@ name = "fart-aabb"
 version = "0.4.0"
 dependencies = [
  "euclid",
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
  "partial-min-max",
  "quickcheck 0.8.5",
 ]
@@ -459,7 +465,7 @@ dependencies = [
 name = "fart-utils"
 version = "0.4.0"
 dependencies = [
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
 ]
 
 [[package]]
@@ -480,7 +486,7 @@ version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75224bec9bfe1a65e2d34132933f2de7fe79900c96a0174307554244ece8150e"
 dependencies = [
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
 ]
 
 [[package]]
@@ -849,7 +855,7 @@ version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712d7b3ea5827fcb9d4fda14bf4da5f136f0db2ae9c8f4bd4e2d1c6fde4e6db2"
 dependencies = [
- "autocfg",
+ "autocfg 0.1.7",
 ]
 
 [[package]]
@@ -1099,8 +1105,8 @@ version = "0.1.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b85e541ef8255f6cf42bbfe4ef361305c6c135d10919ecc26126c4e5ae94bc09"
 dependencies = [
- "autocfg",
- "num-traits 0.2.10",
+ "autocfg 0.1.7",
+ "num-traits 0.2.11",
 ]
 
 [[package]]
@@ -1109,9 +1115,9 @@ version = "0.1.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "76bd5272412d173d6bf9afdf98db8612bbabc9a7a830b7bfc9c188911716132e"
 dependencies = [
- "autocfg",
+ "autocfg 0.1.7",
  "num-integer",
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
 ]
 
 [[package]]
@@ -1121,7 +1127,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee314c74bd753fc86b4780aa9475da469155f3848473a261d2d18e35245a784e"
 dependencies = [
  "num-integer",
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
 ]
 
 [[package]]
@@ -1130,16 +1136,16 @@ version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92e5113e9fd4cc14ded8e499429f396a20f98c772a47cc8622a736e1ec843c31"
 dependencies = [
- "num-traits 0.2.10",
+ "num-traits 0.2.11",
 ]
 
 [[package]]
 name = "num-traits"
-version = "0.2.10"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4c81ffc11c212fa327657cb19dd85eb7419e163b5b076bede2bdb5c974c07e4"
+checksum = "c62be47e61d1842b9170f0fdeec8eba98e60e90e5446449a0545e5152acd7096"
 dependencies = [
- "autocfg",
+ "autocfg 1.0.0",
 ]
 
 [[package]]
@@ -1357,7 +1363,7 @@ version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6d71dacdc3c88c1fde3885a3be3fbab9f35724e6ce99467f7d9c5026132184ca"
 dependencies = [
- "autocfg",
+ "autocfg 0.1.7",
  "libc",
  "rand_chacha 0.1.1",
  "rand_core 0.4.2",
@@ -1389,7 +1395,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "556d3a1ca6600bfcbab7c7c91ccb085ac7fbbcd70e008a98742e7847f4f7bcef"
 dependencies = [
- "autocfg",
+ "autocfg 0.1.7",
  "rand_core 0.3.1",
 ]
 
@@ -1485,7 +1491,7 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abf9b09b01790cfe0364f52bf32995ea3c39f4d2dd011eac241d2914146d0b44"
 dependencies = [
- "autocfg",
+ "autocfg 0.1.7",
  "rand_core 0.4.2",
 ]
 
