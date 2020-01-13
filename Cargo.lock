@@ -347,6 +347,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "env_logger"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "44533bbbb3bb3c1fa17d9f2e4e38bbbaf8396ba82193c4cb1b6445d711445d36"
+dependencies = [
+ "log",
+ "regex",
+]
+
+[[package]]
 name = "error-chain"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -453,7 +463,7 @@ dependencies = [
  "http-service",
  "notify",
  "predicates",
- "quickcheck 0.9.0",
+ "quickcheck 0.9.1",
  "serde",
  "serde_json",
  "structopt",
@@ -1317,7 +1327,7 @@ version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c35d9c36a562f37eca96e79f66d5fd56eefbc22560dacc4a864cabd2d277456"
 dependencies = [
- "env_logger",
+ "env_logger 0.6.2",
  "log",
  "rand 0.6.5",
  "rand_core 0.4.2",
@@ -1325,11 +1335,11 @@ dependencies = [
 
 [[package]]
 name = "quickcheck"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5ca504a2fdaa08d3517f442fbbba91ac24d1ec4c51ea68688a038765e3b2662"
+checksum = "e8d919c9f3bcfb9113365035dbba19aee3bf89b129b77085feaaf8a06819b5b1"
 dependencies = [
- "env_logger",
+ "env_logger 0.7.1",
  "log",
  "rand 0.7.2",
  "rand_core 0.5.1",
