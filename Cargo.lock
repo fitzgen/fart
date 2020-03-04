@@ -1777,9 +1777,9 @@ dependencies = [
 
 [[package]]
 name = "svg"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3dff1d4826764f61aab75297bbc896e31e6d79903798245c1021f5f7fdfada9"
+checksum = "99bfc4e5077d9047fe8a5cbeb22f0164251e015f85480599892060c07a4e853f"
 
 [[package]]
 name = "syn"
