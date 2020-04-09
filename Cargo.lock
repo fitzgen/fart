@@ -374,7 +374,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ab49e9dcb602294bc42f9a7dfc9bc6e936fca4418ea300dbfb84fe16de0b7d9"
 dependencies = [
  "backtrace",
- "version_check",
+ "version_check 0.1.5",
 ]
 
 [[package]]
@@ -1277,28 +1277,28 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-error"
-version = "0.4.8"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "875077759af22fa20b610ad4471d8155b321c89c3f2785526c9839b099be4e0a"
+checksum = "8931031034aa65c73f3f1a05c3ec0fa51287fcd06557ecf4e88b2768bdca375e"
 dependencies = [
  "proc-macro-error-attr",
  "proc-macro2",
  "quote",
- "rustversion",
  "syn",
+ "version_check 0.9.1",
 ]
 
 [[package]]
 name = "proc-macro-error-attr"
-version = "0.4.8"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5717d9fa2664351a01ed73ba5ef6df09c01a521cb42cb65a061432a826f3c7a"
+checksum = "2147536f412ee7ae5529364ed50172ca0220fd64591e236296f45f36b38b2f98"
 dependencies = [
  "proc-macro2",
  "quote",
- "rustversion",
  "syn",
  "syn-mid",
+ "version_check 0.9.1",
 ]
 
 [[package]]
@@ -1608,17 +1608,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustversion"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c48f91977f4ef3be5358c15d131d3f663f6b4d7a112555bf3bf52ad23b6659e5"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "ryu"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1727,9 +1716,9 @@ checksum = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 
 [[package]]
 name = "structopt"
-version = "0.3.12"
+version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8faa2719539bbe9d77869bfb15d4ee769f99525e707931452c97b693b3f159d"
+checksum = "ff6da2e8d107dfd7b74df5ef4d205c6aebee0706c647f6bc6a2d5789905c00fb"
 dependencies = [
  "clap",
  "lazy_static",
@@ -1738,9 +1727,9 @@ dependencies = [
 
 [[package]]
 name = "structopt-derive"
-version = "0.4.5"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f88b8e18c69496aad6f9ddf4630dd7d585bcaf765786cb415b9aec2fe5a0430"
+checksum = "a489c87c08fbaf12e386665109dd13470dcc9c4583ea3e10dd2b4523e5ebd9ac"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -2055,6 +2044,12 @@ name = "version_check"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "914b1a6776c4c929a602fafd8bc742e06365d4bcbe48c30f9cca5824f70dc9dd"
+
+[[package]]
+name = "version_check"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "078775d0255232fb988e6fccf26ddc9d1ac274299aaedcedce21c6f72cc533ce"
 
 [[package]]
 name = "wait-timeout"
