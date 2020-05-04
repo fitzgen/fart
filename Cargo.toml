@@ -11,7 +11,7 @@ version = "0.4.0"
 
 [dependencies]
 euclid = "0.20.11"
-failure = "0.1.7"
+failure = "0.1.8"
 fart-2d-geom = { version = "=0.4.0", path = "crates/2d-geom" }
 fart-aabb = { version = "=0.4.0", path = "crates/aabb" }
 fart-utils = { version = "=0.4.0", path = "crates/utils" }
