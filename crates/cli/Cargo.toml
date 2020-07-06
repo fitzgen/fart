@@ -14,7 +14,7 @@ path = "src/main.rs"
 
 [dependencies]
 async-std = "1.5.0"
-chrono = "0.4.12"
+chrono = "0.4.13"
 failure = "0.1.8"
 notify = "4.0.15"
 structopt = "0.3.15"
