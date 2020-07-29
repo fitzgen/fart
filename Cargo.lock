@@ -393,6 +393,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "euclid"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9eef94d052d358fe59b62b1c2405e107f1c038542f0db9f8bbc8c5735bc4e27"
+dependencies = [
+ "num-traits 0.2.12",
+]
+
+[[package]]
 name = "failure"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -418,7 +427,7 @@ dependencies = [
 name = "fart"
 version = "0.4.0"
 dependencies = [
- "euclid",
+ "euclid 0.21.0",
  "failure",
  "fart-2d-geom",
  "fart-aabb",
@@ -436,7 +445,7 @@ dependencies = [
 name = "fart-2d-geom"
 version = "0.4.0"
 dependencies = [
- "euclid",
+ "euclid 0.20.14",
  "fart-aabb",
  "fart-utils",
  "num-traits 0.2.12",
@@ -449,7 +458,7 @@ dependencies = [
 name = "fart-aabb"
 version = "0.4.0"
 dependencies = [
- "euclid",
+ "euclid 0.20.14",
  "num-traits 0.2.12",
  "partial-min-max",
  "quickcheck 0.8.5",
