@@ -43,7 +43,9 @@ mod user_const;
 // Re-exports of our public dependencies.
 pub use euclid;
 pub use failure;
+#[doc(inline)]
 pub use fart_2d_geom as geom;
+#[doc(inline)]
 pub use fart_aabb as aabb;
 pub use lazy_static;
 pub use noise;
