@@ -170,7 +170,7 @@ pub enum LineCommand<T, U> {
 
 impl<T, U> LineCommand<T, U>
 where
-    T: Copy + Num + PartialOrd + euclid::Trig,
+    T: Copy + Num + PartialOrd,
 {
     /// Transform this line command with the given linear transformation and
     /// return the new, transformed line command.
@@ -417,7 +417,7 @@ where
 
 impl<T, U> Path<T, U>
 where
-    T: Copy + Num + PartialOrd + euclid::Trig,
+    T: Copy + Num + PartialOrd,
 {
     /// Transform this path with the given linear transformation and return
     /// the new, transformed path.

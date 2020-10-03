@@ -293,7 +293,7 @@ where
 
 impl<T, U> Line<T, U>
 where
-    T: Copy + Num + PartialOrd + euclid::Trig,
+    T: Copy + Num + PartialOrd
 {
     /// Transform this line with the given linear transformation and return the
     /// new, transformed line.
@@ -337,6 +337,11 @@ where
 }
 
 impl<U> Line<f64, U> {
+    /// Returns the length of the vector `self.a - self.b`.
+    pub fn length(&self) -> f64 {
+        (self.a - self.b).length()
+    }
+
     /// Get the intersection between two line segments.
     ///
     /// The kind of intersection is broken down by whether it is proper,

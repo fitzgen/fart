@@ -10,7 +10,7 @@ repository = "https://github.com/fitzgen/fart/tree/master/crates/aabb"
 version = "0.4.0"
 
 [dependencies]
-euclid = "0.20.1"
+euclid = "0.20.7"
 num-traits = "0.2.6"
 partial-min-max = { version = "=0.4.0", path = "../partial-min-max" }
 

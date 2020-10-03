@@ -125,11 +125,16 @@ impl futures::io::AsyncRead for EventStream {
     ) -> Poll<io::Result<usize>> {
         use futures::io::AsyncBufRead;
 
-        let data = futures::ready!(self.as_mut().poll_fill_buf(cx))?;
-        buf.copy_from_slice(&data);
-        let n = std::cmp::min(buf.len(), data.len());
-        self.consume(n);
-        Poll::Ready(Ok(n))
+        loop {
+            let data = futures::ready!(self.as_mut().poll_fill_buf(cx))?;
+            let n = std::cmp::min(buf.len(), data.len());
+            if n == 0 {
+                continue;
+            }
+            buf[..n].copy_from_slice(&data[..n]);
+            self.consume(n);
+            return Poll::Ready(Ok(n));
+        }
     }
 }
 

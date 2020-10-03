@@ -503,7 +503,7 @@ where
 
 impl<T, U> Polygon<T, U>
 where
-    T: Copy + Num + PartialOrd + euclid::Trig,
+    T: Copy + Num + PartialOrd
 {
     /// Transform this polygon with the given linear transformation and return
     /// the new, transformed polygon.

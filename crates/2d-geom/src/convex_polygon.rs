@@ -228,7 +228,7 @@ where
 
 impl<T, U> ConvexPolygon<T, U>
 where
-    T: Copy + Num + PartialOrd + euclid::Trig,
+    T: Copy + Num + PartialOrd
 {
     /// Transform this convex polygon with the given linear transformation and
     /// return the new, transformed convex polygon.
