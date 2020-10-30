@@ -18,7 +18,7 @@ fart-utils = { version = "=0.4.0", path = "crates/utils" }
 id-arena = "2.2.1"
 lazy_static = "1.4.0"
 noise = "0.6.0"
-num-traits = "0.2.12"
+num-traits = "0.2.14"
 rand = "0.6.5"
 svg = "0.8.0"
 partial-min-max = { path = "crates/partial-min-max", version = "=0.4.0" }
