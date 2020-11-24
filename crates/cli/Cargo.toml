@@ -26,7 +26,7 @@ bytes = "0.6.0"
 http-service = "0.5.0"
 
 [dev-dependencies]
-assert_cmd = "1.0.1"
+assert_cmd = "1.0.2"
 predicates = "1.0.5"
 quickcheck = "0.9.2"
 tempfile = "3.1.0"
