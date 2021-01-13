@@ -442,7 +442,7 @@ dependencies = [
  "noise",
  "num-traits",
  "partial-min-max",
- "rand 0.6.5",
+ "rand 0.8.1",
  "svg",
 ]
 

@@ -19,7 +19,7 @@ id-arena = "2.2.1"
 lazy_static = "1.4.0"
 noise = "0.7.0"
 num-traits = "0.2.14"
-rand = "0.6.5"
+rand = "0.8.1"
 svg = "0.8.1"
 partial-min-max = { path = "crates/partial-min-max", version = "=0.4.0" }
 
